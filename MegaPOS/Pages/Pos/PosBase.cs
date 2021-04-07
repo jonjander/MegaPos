@@ -116,10 +116,10 @@ namespace MegaPOS.Pages.Pos
                 await posState.ChangeProductLocalProfit(command.OriginalProduct.ProductId, command.LocalProfit);
 
             if (command.Name != command.OriginalProduct.Name)
-                await posState.ChangeProductName(command.OriginalProduct.ProductId, command.Name);
+                await posState.ChangeProductName(command.OriginalProduct.ProductId, command.Name, hubConnection);
 
             if (command.MinPriceProcentage != command.OriginalProduct.MinPriceProcentage)
-                await posState.ChangeProductMinPriceProcentage(command.OriginalProduct.ProductId, command.MinPriceProcentage);
+                await posState.ChangeProductMinPriceProcentage(command.OriginalProduct.ProductId, command.MinPriceProcentage, hubConnection);
 
             if (command.Quantity != command.OriginalProduct.Quantity)
                 await posState.ChangeProductQuantity(command.OriginalProduct.ProductId,  command.Quantity - command.OriginalProduct.Quantity);
@@ -138,6 +138,11 @@ namespace MegaPOS.Pages.Pos
             Customer.Orders = Customer.Orders
                 .Where(_ => _.Id != orderId)
                 .ToList();
+        }
+
+        protected async Task OpenEditModal(ProductVm product)
+        {
+            changeProductModal.ShowModal(product);
         }
     }
 }

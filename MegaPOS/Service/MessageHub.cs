@@ -21,7 +21,8 @@ namespace MegaPOS.Service
         OpenTerminal,
         TerminalOpenConfirmation,
         CloseTerminal,
-        TerminalSummary
+        TerminalSummary,
+        ProductNameChange
     }
 
 
@@ -75,6 +76,11 @@ namespace MegaPOS.Service
         public async Task SendTerminalSummary(TerminalSummaryEvent Event)
         {
             await Clients.All.SendAsync(SendMethods.TerminalSummary.ToString(), Event);
+        }
+
+        public async Task SendProductNameChanged(ProductNameChanged Event)
+        {
+            await Clients.All.SendAsync(SendMethods.ProductNameChange.ToString(), Event);
         }
 
         public static HubConnection SetupMessageHub(NavigationManager NavigationManager)

@@ -24,6 +24,7 @@ namespace MegaPOS.Model.Commands
         {
             OriginalProduct = product;
             Name = product.Name;
+            Quantity = product.Quantity;
             LocalProfit = product.LocalProfit;
             MinPriceProcentage = product.MinPriceProcentage;
         }

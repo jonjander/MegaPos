@@ -45,6 +45,7 @@
                 foreach (var item in Model?.AvalibleProducts.OrderBy(_ => _.Name).ToList())
                 {
                     <ProductCard Model="item"
+                                 OnPoductChanged="OpenEditModal"
                                  OnBuyProduct="BuyProduct" />
                 }
             }

@@ -54,12 +54,20 @@ namespace MegaPOS.Pages
             {
                 if (posState.StoreId == Event.StoreId)
                 {
-
                     Model.Products.FirstOrDefault(_ => _.ProductId == Event.ProductId).Quantity = Event.NewQuantity;
                     if (Event.NewQuantity <= 0)
                         Model.LeaderboardRows.FirstOrDefault(_ => _.ProductId == Event.ProductId).IsDisabled = true;
                     posState.InvokeProductAddedRemoved();
                     posState.InvokeProductPriceChanged();
+                }
+            });
+
+            hubConnection.On<ProductNameChanged>(SendMethods.ProductNameChange.ToString(), async (Event) => {
+                if (posState.StoreId == Event.StoreId)
+                {
+                    Model.Products.FirstOrDefault(_ => _.ProductId == Event.ProductId).Name = Event.Name;
+                    Model.LeaderboardRows.FirstOrDefault(_ => _.ProductId == Event.ProductId).Name = Event.Name;
+                    await posState.NameChanged(Event.ProductId, Event.Name);
                 }
             });
 
@@ -87,6 +95,10 @@ namespace MegaPOS.Pages
                         await posState.QuantityChanged(item.ProductId, item.Quantity);
                     }
 
+                    foreach (var item in Model.Products)
+                    {
+                        await posState.NameChanged(item.ProductId, item.Name);
+                    }
                 }
             });
 

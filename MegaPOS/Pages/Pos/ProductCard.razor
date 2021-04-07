@@ -1,18 +1,22 @@
-﻿<div class="product-card" @onclick="BuyProduct">
-    @if (Model.IsDisabled || Model.Quantity <= 0)
-    {
-        <h4><del>@Model.Name</del></h4>
-    }
-    else
-    {
-        <h4>@Model.Name</h4>
-    }
-    <h5>@Model.Price.ToString("0.00") kr</h5>
-    <p>Quantity : @Model.Quantity</p>
+﻿<div class="product-card" >
+    <div @onclick="BuyProduct" style="width:100%">
+        @if (Model.IsDisabled || Model.Quantity <= 0)
+        {
+            <h4><del>@Model.Name</del></h4>
+        }
+        else
+        {
+            <h4>@Model.Name</h4>
+        }
+        <h5>@Model.Price.ToString("0.00") kr</h5>
+        <p>Quantity : @Model.Quantity</p>
+    </div>
+    <Button Clicked="@Edit" ><Icon Name="IconName.Edit" /></Button>
 </div>
 @code {
     [Parameter]public ProductVm Model { get; set; }
     [Parameter]public EventCallback<ProductVm> OnBuyProduct { get; set; }
+    [Parameter]public EventCallback<ProductVm> OnPoductChanged { get; set; }
     [Inject] public PosState posState { get; set; }
 
     private async Task BuyProduct()
@@ -21,6 +25,11 @@
         {
             await OnBuyProduct.InvokeAsync(Model);
         }
+    }
+
+    public async Task Edit()
+    {
+        await OnPoductChanged.InvokeAsync(Model);
     }
 
     public void Dispose()
@@ -45,9 +54,13 @@
             {
                 var u = updated as UpdateRowQuantity;
                 Model.Quantity = u.Quantity;
+            } else if (updated is UpdateRowName)
+            {
+                var updatedprice = updated as UpdateRowName;
+                Model.Name = updatedprice.NewName;
             }
+            StateHasChanged();
         }
 
     }
-}
 }

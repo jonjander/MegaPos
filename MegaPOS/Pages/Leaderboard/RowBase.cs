@@ -41,6 +41,12 @@ namespace MegaPOS.Pages.Leaderboard
                     RowModel.Update(updatedprice);
                     await AnimerPris(updatedprice.OldPrice, updatedprice.NewPrice);
                 }
+
+                if (updated is UpdateRowName)
+                {
+                    var updatedprice = updated as UpdateRowName;
+                    RowModel.Name = updatedprice.NewName;
+                }
                 
             }
         }
