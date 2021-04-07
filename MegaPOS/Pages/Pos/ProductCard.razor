@@ -1,0 +1,26 @@
+﻿<div class="product-card" @onclick="BuyProduct">
+    @if (Model.IsDisabled || Model.Quantity <= 0)
+    {
+        <h4><del>@Model.Name</del></h4>
+    }
+    else
+    {
+        <h4>@Model.Name</h4>
+    }
+    <h5>@Model.Price.ToString("0.00") kr</h5>
+    <p>Quantity : @Model.Quantity</p>
+</div>
+@code {
+    [Parameter]public ProductVm Model { get; set; }
+    [Parameter]public EventCallback<ProductVm> OnBuyProduct { get; set; }
+
+    private async Task BuyProduct()
+    {
+        if (Model.Quantity > 0)
+        {
+            await OnBuyProduct.InvokeAsync(Model);
+        }
+    }
+
+
+}

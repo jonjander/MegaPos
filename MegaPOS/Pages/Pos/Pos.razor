@@ -1,0 +1,76 @@
+﻿@using MegaPOS.Shared.ModalComponents 
+@page "/"
+@inherits PosBase
+
+<AddProductModal @ref="addProductModal"
+                 StoreId="@posState.StoreId"
+                 OnAddProduct="AddProduct"/>
+<CustomersModal @ref="customersModal"
+                OnSelectedCustomer="ChangeCustomer" />
+
+<CheckoutModal @ref="checkoutModal" 
+               OnCustomerPayed="CustomerPayed"/>
+
+<Row>
+    <Column ColumnSize="ColumnSize.Is6">
+        <Button Clicked="addProductModal.ShowModal"
+                Color="Color.Primary">
+            Add product
+        </Button>
+    </Column>
+    <Column ColumnSize="ColumnSize.Is4">
+        <Field>
+            @if (Customer != null)
+            {
+            <TextEdit Placeholder="Customer Name" Text="@Customer.Name" TextChanged="ChangeCustomerName" />
+            }
+        </Field>
+    </Column>
+    <Column ColumnSize="ColumnSize.Is2">
+        <Button Clicked="customersModal.ShowModal"
+                Color="Color.Primary">
+            Change customer
+        </Button>
+    </Column>
+</Row>
+<Row>
+    <Column ColumnSize="ColumnSize.Is9">
+        <div class="product-container">
+            @if (Model?.AvalibleProducts != null && Model.AvalibleProducts.Any())
+            {
+                foreach (var item in Model?.AvalibleProducts.OrderBy(_ => _.Name).ToList())
+                {
+                    <ProductCard Model="item"
+                                 OnBuyProduct="BuyProduct" />
+                }
+            }
+        </div>
+    </Column>
+    <Column ColumnSize="ColumnSize.Is3">
+        <div class="cart-container">
+            @if (Customer != null && Customer.Orders.Any()) {
+                @foreach (var item in Customer?.Orders)
+                {
+                    <div>@item.ProductName @item.Price.ToString("0.00")</div>
+                }
+            }
+        <div class="cart-checkout">
+            <div>Total: @(Customer?.Orders?.Sum(_=>_.Price).ToString("0.00") ?? "0.00")kr</div>
+            <Button Clicked="Checkout"
+                    Color="Color.Warning">
+                Checkout
+            </Button>
+            <Button Clicked="ParkCustomer"
+                    Color="Color.Warning">
+                Park
+            </Button>
+        </div>
+        </div>
+    </Column>
+</Row>
+<Row>
+    <Column ColumnSize="ColumnSize.Is12">
+        <Slider TValue="int" Value="@GlobalProfit" ValueChanged="@ChangeGlobalProfit" Min="50" Max="400" Step="1" />
+        <p>@(GlobalProfit) %</p>
+    </Column>
+</Row>

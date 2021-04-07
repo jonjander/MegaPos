@@ -1,0 +1,33 @@
+﻿@page "/board"
+@inherits LeaderboardBase
+
+<Button Clicked="Test">test</Button>
+<h3>LeaderboardComponent connected @(hubConnection.State == Microsoft.AspNetCore.SignalR.Client.HubConnectionState.Connected) </h3>
+
+<div class="all-slides">
+    @if (Model?.LeaderboardRows != null)
+    {
+        @foreach (var row in Model.LeaderboardRows)
+        {
+            <LeaderboardRow RowModel="row"/>
+        }
+    }
+</div>
+
+<style>
+    @if (Model?.LeaderboardRows != null)
+    {
+         @foreach (var r in Model.LeaderboardRows)
+         {
+             @($@".single-slide[data-order=""{@r.Order}""] {{top: {(((r.Order * 50) + 10).ToString())}px;z-index: 3;}}")
+         }
+    }
+</style>
+
+@code {
+ 
+    private void Test()
+    {
+        var s = posState;
+    }
+}

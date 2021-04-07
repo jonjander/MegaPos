@@ -1,0 +1,44 @@
+﻿@using MegaPOS.Enum 
+@inherits CheckoutModalBase
+
+<Modal @ref="modalRef">
+    <ModalContent IsCentered="true">
+        <ModalHeader>
+            <ModalTitle>Add new product</ModalTitle>
+            <CloseButton />
+        </ModalHeader>
+        <ModalBody>
+            @switch (stage)
+            {
+                case CheckoutStages.Idle:
+                    <p>Idle</p>
+                    break;
+                case CheckoutStages.TerminalScanning:
+                    <p>Looking for terminals</p>
+                    break;
+                case CheckoutStages.TerminalFound:
+                    @foreach (var item in AvalibleTerminals)
+                    {
+                        <div class="terminal-card" @onclick="@(async ()=> await SelectTerminal(item))">@item</div>
+                    }
+                    break;
+                case CheckoutStages.TerminalSelected:
+                    <p>Connected to @TerminalId</p><br />
+                    <p>Please confirm payment!</p>
+                    break;
+                case CheckoutStages.Compleated:
+                    break;
+                default:
+                    break;
+            }
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Secondary" Clicked="@CloseModal">Close</Button>
+            <Button Color="Color.Warning" Clicked="@MarkAsPaid">Paied</Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
+
+@code {
+   
+}

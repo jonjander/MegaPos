@@ -1,0 +1,56 @@
+﻿@inject PosState posState
+
+<Modal @ref="modalRef">
+    <ModalContent IsCentered="true">
+        <ModalHeader>
+            <ModalTitle>Open Customers</ModalTitle>
+            <CloseButton />
+        </ModalHeader>
+        <ModalBody>
+            <Table Hoverable="true">
+                <TableHeader>
+                    <TableRow>
+                        <TableHeaderCell>Namn</TableHeaderCell>
+                        <TableHeaderCell>Unpaid products</TableHeaderCell>
+                        <TableHeaderCell>Price</TableHeaderCell>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    @foreach (var item in model)
+                    {
+                        <TableRow Clicked="@(()=>OpenCustomer(item.Id))">
+                            <TableRowHeader>@item.Name</TableRowHeader>
+                            <TableRowCell>@item.Orders.Count</TableRowCell>
+                            <TableRowCell>@item.Orders.Sum(_=>_.Price).ToString("0.00")<span>kr</span></TableRowCell>
+                        </TableRow>
+                    }
+                </TableBody>
+            </Table>
+            </ModalBody>
+        </ModalContent>
+</Modal>
+@code {
+    [Parameter] public EventCallback<string> OnSelectedCustomer {get;set;}
+    private List<CustomerVm> model { get; set; } = new List<CustomerVm>();
+    private Modal modalRef;
+
+    protected override async Task OnInitializedAsync()
+    {
+        model = await posState.LoadOpenCustomers();
+    }
+
+    public async Task OpenCustomer(string customer)
+    {
+        await OnSelectedCustomer.InvokeAsync(customer);
+        modalRef.Hide();
+    }
+
+
+    public async Task ShowModal()
+    {
+        model = await posState.LoadOpenCustomers();
+        modalRef.Show();
+    }
+
+
+}

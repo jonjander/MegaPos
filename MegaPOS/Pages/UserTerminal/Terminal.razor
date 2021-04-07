@@ -1,0 +1,34 @@
+﻿@page "/terminal/{name}"
+@inherits TerminalBase
+
+<h1>Terminal @name</h1>
+@if (DisplaySummary)
+{
+    <Row>
+        <Column ColumnSize="ColumnSize.Is8">
+            <div>
+                <img src="@QRCodeStr" class="qr-code-image" />
+            </div>
+        </Column>
+        <Column ColumnSize="ColumnSize.Is4">
+            @foreach (var item in Orders)
+            {
+                <Row>
+                    <Column ColumnSize="ColumnSize.Is6">@item.ProductName</Column>
+                    <Column ColumnSize="ColumnSize.Is6">@item.Price.ToString("0.00")<span>kr</span></Column>
+                </Row>
+            }
+            <Row>
+                <Column ColumnSize="ColumnSize.Is6"></Column>
+                <Column ColumnSize="ColumnSize.Is6">
+                    <b>@Orders.Sum(_ => _.Price).ToString("0.00")<span>kr</span></b>
+                </Column>
+            </Row>
+        </Column>
+    </Row>
+    
+}
+
+@code {
+
+}

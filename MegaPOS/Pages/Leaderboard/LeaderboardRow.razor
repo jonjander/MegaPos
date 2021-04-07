@@ -1,0 +1,18 @@
+﻿@inherits RowBase
+
+<div class="single-slide" data-order="@RowModel.Order" style="cursor: pointer">
+    @if (RowModel.IsDisabled) {
+        <del>@RowModel.Name ##### </del>
+    } else {
+        <div>@RowModel.Name ##### </div><div style="display:inline-block" id="@RowModel.ProductId">@RowModel.Price</div><span>Kr</span>
+    }
+</div>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await AnimateNumber(RowModel.ProductId, 0, RowModel.Price, AnimeringsHastighet);
+    }
+}
+
