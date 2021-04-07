@@ -18,6 +18,7 @@
     "MegaPOS": {
       "commandName": "Project",
       "launchBrowser": true,
+      "launchUrl": "test",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
@@ -27,7 +28,7 @@
     "MegaPOSBoard": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "board",
+      "launchUrl": "test/board",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
@@ -37,7 +38,7 @@
     "MegaPOSTerminal": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "terminal/t0",
+      "launchUrl": "test/terminal/t0",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

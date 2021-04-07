@@ -51,9 +51,10 @@ namespace MegaPOS.Model
 			=> Products?.Where(p => p.Quantity > 0)
 				.OrderByDescending(_ => _.Price)
 				.ToList() ?? new List<Product>();
-		
 
-		public void SetProfit(float profit)
+        public string Name { get; set; }
+
+        public void SetProfit(float profit)
 		{
 			this.ProfitTarget = profit;
 			
@@ -66,8 +67,9 @@ namespace MegaPOS.Model
 			Orders.Add(new Order(product, OrderType.Expences, product.OriginalPrice, product.Quantity));
 		}
 
-		public Store(float globalprofit)
+		public Store(float globalprofit, string name)
 		{
+			Name = name;
 			Orders = new List<Order>();
 			Products = new List<Product>();
 			ProfitTarget = globalprofit;

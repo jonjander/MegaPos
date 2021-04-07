@@ -81,9 +81,9 @@ namespace MegaPOS.Extentions
             => customers.Select(_ => _.ToVm()).ToList();
 
         public static OrderVm ToVm(this Order order)
-            => new OrderVm { 
-                Price = order.Credit,
-                ProductName = order.Product.Name
+            => order == null ? default : new OrderVm { 
+                Price = order?.Credit ?? 0f,
+                ProductName = order?.Product?.Name
             };
 
         public static List<OrderVm> ToVm(this IEnumerable<Order> orders)

@@ -1,12 +1,19 @@
 ﻿@inherits RowBase
 
+
 <div class="single-slide" data-order="@RowModel.Order" style="cursor: pointer">
-    @if (RowModel.IsDisabled) {
-        <del>@RowModel.Name ##### </del>
-    } else {
-        <div>@RowModel.Name ##### </div><div style="display:inline-block" id="@RowModel.ProductId">@RowModel.Price</div><span>Kr</span>
-    }
+    <div class="l-row-content">
+        @if (RowModel.IsDisabled)
+        {
+            <del class="l-row-name">@RowModel.Name ##### </del>
+        }
+        else
+        {
+            <div class="l-row-name">@RowModel.Name ##### </div><div class="l-row-price"><div id="@RowModel.ProductId">@(RowModel.Price)</div>Kr</div>
+        }
+    </div>
 </div>
+
 
 @code {
     protected override async Task OnAfterRenderAsync(bool firstRender)

@@ -16,6 +16,7 @@ namespace MegaPOS.Pages
 {
     public class PageBase : ComponentBase, IDisposable
     {
+        [Parameter] public string Id { get; set; }
         protected HubConnection hubConnection { get; set; }
         [Inject] public NavigationManager NavigationManager { get; set; }
         [Inject] public IJSRuntime JSRuntime { get; set; }
@@ -32,7 +33,7 @@ namespace MegaPOS.Pages
 
         protected override async Task OnInitializedAsync()
         {
-            await posState.Init();
+            await posState.Init(Id);
             hubConnection = MessageHub.SetupMessageHub(NavigationManager);
             SetupMessageHub();
             await hubConnection.StartAsync();

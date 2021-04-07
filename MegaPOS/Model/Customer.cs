@@ -10,8 +10,10 @@ namespace MegaPOS.Model
 		public string Name { get; set; }
 		public List<Order> Orders { get; set; } = new List<Order>();
 		public bool? Closed { get; set; } = null;
+        public string StoreId { get; set; }
+        public Store Store { get; set; }
 
-		internal void LäggTillOrer(Order order)
+        internal void LäggTillOrer(Order order)
 		{
 			Orders.Add(order);
 		}

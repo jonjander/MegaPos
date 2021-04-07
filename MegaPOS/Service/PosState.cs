@@ -33,14 +33,16 @@ namespace MegaPOS.Service
         {
             var emptyslot = await DatabaseContext.Customers
                 .Include(_ => _.Orders)
-                .FirstOrDefaultAsync(_ => _.Orders.Count == 0 && string.IsNullOrEmpty(_.Name));
+                .FirstOrDefaultAsync(_ => _.Orders.Count == 0 && string.IsNullOrEmpty(_.Name) && _.StoreId == StoreId);
             if (emptyslot != null)
             {
                 return emptyslot.ToVm();
             }
             else
             {
-                var newCustomer = await DatabaseContext.Customers.AddAsync(new Customer());
+                var newCustomer = await DatabaseContext.Customers.AddAsync(new Customer() { 
+                    StoreId = StoreId
+                });
                 await DatabaseContext.SaveChangesAsync();
                 return newCustomer.Entity.ToVm();
             }
@@ -126,17 +128,19 @@ namespace MegaPOS.Service
             DatabaseContext = databaseContext;
         }
 
-        public async Task Init()
+        public async Task Init(string name)
         {
+            if (string.IsNullOrEmpty(name))
+                throw new Exception("name error");
             var existing = DatabaseContext.Stores
                 .Include(_ => _.Products)
                 .Include(_ => _.Orders)
                 .ThenInclude(_ => _.Product)
                 .OrderBy(_ => _.Id)
-                .FirstOrDefault();
+                .FirstOrDefault(_=>_.Name == name);
             if (existing == null)
             {
-                existing = new Store(1.0f);
+                existing = new Store(1.0f, name);
                 DatabaseContext.Add(existing);
                 await DatabaseContext.SaveChangesAsync();
             }
@@ -282,7 +286,7 @@ namespace MegaPOS.Service
         {
             var customers = await DatabaseContext.Set<Customer>()
                 .Include(_=>_.Orders)
-                .Where(_ => _.Closed != true)
+                .Where(_ => _.Closed != true && _.StoreId == StoreId)
                 .ToListAsync();
             return customers.ToVm();
         }

@@ -80,6 +80,11 @@ namespace MegaPOS.DBContext
                 .HasForeignKey(_ => _.StoreId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<Store>()
+                .HasMany<Customer>()
+                .WithOne(_ => _.Store)
+                .HasForeignKey(_ => _.StoreId);
+
 
             //Order
             modelBuilder.Entity<Order>()

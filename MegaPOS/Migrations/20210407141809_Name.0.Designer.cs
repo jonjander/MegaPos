@@ -4,14 +4,16 @@ using MegaPOS.DBContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace MegaPOS.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20210407141809_Name.0")]
+    partial class Name0
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31,12 +33,7 @@ namespace MegaPOS.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("StoreId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("StoreId");
 
                     b.ToTable("Customers");
                 });
@@ -129,15 +126,6 @@ namespace MegaPOS.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Stores");
-                });
-
-            modelBuilder.Entity("MegaPOS.Model.Customer", b =>
-                {
-                    b.HasOne("MegaPOS.Model.Store", "Store")
-                        .WithMany()
-                        .HasForeignKey("StoreId");
-
-                    b.Navigation("Store");
                 });
 
             modelBuilder.Entity("MegaPOS.Model.Order", b =>
