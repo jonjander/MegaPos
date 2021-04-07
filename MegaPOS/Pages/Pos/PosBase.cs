@@ -26,6 +26,7 @@ namespace MegaPOS.Pages.Pos
         protected AddProductModal addProductModal { get; set; }
         protected CustomersModal customersModal { get; set; }
         protected CheckoutModal checkoutModal { get; set; }
+        protected ChangeProductModal changeProductModal { get; set; }
 
         protected CustomerVm Customer { get; set; }
 
@@ -108,6 +109,21 @@ namespace MegaPOS.Pages.Pos
         {
             await posState.Checkout(customerId);
             await NewCustomer();
+        }
+
+        protected async Task ChangeProduct(ChangeProductCommand command)
+        {
+            if (command.LocalProfit != command.OriginalProduct.LocalProfit)
+                await posState.ChangeProductLocalProfit(command.OriginalProduct.ProductId, command.LocalProfit);
+
+            if (command.Name != command.OriginalProduct.Name)
+                await posState.ChangeProductName(command.OriginalProduct.ProductId, command.Name);
+
+            if (command.MinPriceProcentage != command.OriginalProduct.MinPriceProcentage)
+                await posState.ChangeProductMinPriceProcentage(command.OriginalProduct.ProductId, command.MinPriceProcentage);
+
+            if (command.Quantity != command.OriginalProduct.Quantity)
+                await posState.ChangeProductQuantity(command.OriginalProduct.ProductId,  command.Quantity - command.OriginalProduct.Quantity);
         }
 
         protected async Task ParkCustomer()

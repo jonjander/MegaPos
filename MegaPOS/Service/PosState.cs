@@ -116,6 +116,61 @@ namespace MegaPOS.Service
             return customer.Name;
         }
 
+        internal async Task ChangeProductName(string productId, string name)
+        {
+            var product = await DatabaseContext.Set<Product>().FirstOrDefaultAsync(_ => _.Id == productId);
+            product.Name = name;
+            await DatabaseContext.SaveChangesAsync();
+        }
+
+        internal async Task ChangeProductMinPriceProcentage(string productId, float minPriceProcentage)
+        {
+            var product = await DatabaseContext.Set<Product>().FirstOrDefaultAsync(_ => _.Id == productId);
+            product.UpdateMinPrice(minPriceProcentage);
+            await DatabaseContext.SaveChangesAsync();
+        }
+
+        internal async Task ChangeProductQuantity(string productId, int diff)
+        {
+            var product = await DatabaseContext.Set<Product>().FirstOrDefaultAsync(_ => _.Id == productId);
+            product.Quantity += diff;
+            if (diff <= 0)
+            {
+                var nToRemove = Math.Abs(diff);
+                for (int i = 0; i < nToRemove; i++)
+                {
+                    var revertAsset = await DatabaseContext.Set<Order>()
+                        .FirstOrDefaultAsync(_ => 
+                        _.ProductId == productId &&
+                        _.Type == OrderType.Assets
+                        );
+                    DatabaseContext.Set<Order>().Remove(revertAsset);
+
+                    var revertExpences = await DatabaseContext.Set<Order>()
+                        .FirstOrDefaultAsync(_ =>
+                        _.ProductId == productId &&
+                        _.Type == OrderType.Expences
+                        );
+                    DatabaseContext.Set<Order>().Remove(revertExpences);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < diff; i++)
+                {
+                    Store.AddProduct(product);
+                }
+            }
+            await DatabaseContext.SaveChangesAsync();
+        }
+
+        internal async Task ChangeProductLocalProfit(string productId, float localProfit)
+        {
+            var product = await DatabaseContext.Set<Product>().FirstOrDefaultAsync(_ => _.Id == productId);
+            product.SetProfit(localProfit);
+            await DatabaseContext.SaveChangesAsync();
+        }
+
         internal async Task<float> GetGlobalProfit()
         {
             var store = await DatabaseContext.Set<Store>().FirstOrDefaultAsync(_ => _.Id == Store.Id);
@@ -282,12 +337,18 @@ namespace MegaPOS.Service
             await Task.WhenAll(UpdateRow.Select(_ => _.Invoke(command)));
         }
 
+
+        private bool isLoadingCustomers;
         public async Task<List<CustomerVm>> LoadOpenCustomers()
         {
+            if (isLoadingCustomers)
+                return new List<CustomerVm>();
+            isLoadingCustomers = true;
             var customers = await DatabaseContext.Set<Customer>()
                 .Include(_=>_.Orders)
                 .Where(_ => _.Closed != true && _.StoreId == StoreId)
                 .ToListAsync();
+            isLoadingCustomers = false;
             return customers.ToVm();
         }
 

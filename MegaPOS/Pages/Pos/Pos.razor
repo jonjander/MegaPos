@@ -11,6 +11,10 @@
 <CheckoutModal @ref="checkoutModal" 
                OnCustomerPayed="CustomerPayed"/>
 
+<ChangeProductModal @ref="changeProductModal"
+                    StoreId="@posState.StoreId"
+                    OnProductChanged="ChangeProduct" />
+
 <Row>
     <Column ColumnSize="ColumnSize.Is6">
         <Button Clicked="addProductModal.ShowModal"

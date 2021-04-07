@@ -11,6 +11,9 @@ namespace MegaPOS.Model.vm
         public string ProductId { get; set; }
         public string Name { get; set; }
         public int Quantity { get; set; }
+        public float LocalProfit { get; set; }
         public bool IsDisabled => Quantity <= 0;
+
+        public float MinPriceProcentage { get; set; }
     }
 }

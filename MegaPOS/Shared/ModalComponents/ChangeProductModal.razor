@@ -1,0 +1,71 @@
+﻿@if (model != null)
+{
+    <Modal @ref="modalRef">
+        <ModalContent IsCentered="true">
+            <ModalHeader>
+                <ModalTitle>Change product</ModalTitle>
+                <CloseButton />
+            </ModalHeader>
+            <ModalBody>
+                <Field>
+                    <FieldLabel>Name</FieldLabel>
+                    <TextEdit Placeholder="Name"
+                              @bind-Text="model.Name" />
+                </Field>
+                <Field>
+                    <FieldLabel>Min price percentage</FieldLabel>
+                    <NumericEdit @bind-Value="@model.MinPriceProcentage"
+                                 Min="0.1f"
+                                 Max="1f"
+                                 Placeholder="Price" />
+                </Field>
+                <Field>
+                    <FieldLabel>Quantity</FieldLabel>
+                    <NumericEdit @bind-Value="@model.Quantity"
+                                 Placeholder="Quantity" />
+                </Field>
+                <Field>
+                    <FieldLabel>Local profit</FieldLabel>
+                    <NumericEdit @bind-Value="@model.LocalProfit"
+                                 Min="0.1f"
+                                 Max="99f"
+                                 Placeholder="Local profit" />
+                </Field>
+            </ModalBody>
+            <ModalFooter>
+                <Button Color="Color.Secondary" Clicked="@HideModal">Close</Button>
+                <Button Color="Color.Primary" Clicked="@HideModal">Add product</Button>
+            </ModalFooter>
+        </ModalContent>
+    </Modal>
+}
+@code{
+    [Parameter] public EventCallback<ChangeProductCommand> OnProductChanged { get; set; }
+    [Parameter] public string StoreId { get; set; }
+
+    private Modal modalRef;
+    private ChangeProductCommand model;
+
+    protected override void OnInitialized()
+    {
+        model = new ChangeProductCommand(StoreId);
+    }
+
+    public void ShowModal(ProductVm product)
+    {
+        model = new ChangeProductCommand(StoreId);
+        model.Set(product);
+        modalRef.Show();
+    }
+
+    public async Task HideModal()
+    {
+        if (model.IsValid())
+        {
+            await OnProductChanged.InvokeAsync(model);
+
+            modalRef.Hide();
+        }
+
+    }
+}
