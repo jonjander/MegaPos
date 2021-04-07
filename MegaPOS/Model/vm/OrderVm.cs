@@ -7,6 +7,7 @@ namespace MegaPOS.Model.vm
 {
     public class OrderVm
     {
+        public string Id { get; set; }
         public string ProductName { get; set; }
         public float Price { get; set; }
     }

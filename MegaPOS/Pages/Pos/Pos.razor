@@ -55,7 +55,7 @@
             @if (Customer != null && Customer.Orders.Any()) {
                 @foreach (var item in Customer?.Orders)
                 {
-                    <div>@item.ProductName @item.Price.ToString("0.00")</div>
+                    <div>@item.ProductName @item.Price.ToString("0.00")<Icon Name="IconName.Remove" @onclick="@(async () => RemoveProduct(item.Id, Customer.Id))" /></div>
                 }
             }
         <div class="cart-checkout">

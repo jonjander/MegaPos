@@ -131,5 +131,11 @@ namespace MegaPOS.Pages.Pos
             if (Customer.Orders != null && Customer.Orders.Any())
                 Customer = await posState.GetNewCustomer();
         }
+
+
+        protected async Task RemoveProduct(string orderId, string customerId)
+        {
+            await posState.RemoveProduct(orderId, customerId);
+        }
     }
 }

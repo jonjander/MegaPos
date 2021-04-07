@@ -96,18 +96,7 @@ namespace MegaPOS.Model
 
 		
 
-		internal void Rollback(Customer cust)
-		{
-			if (cust.Closed != null)
-				return;
-			Orders = Orders.Where(o => !cust.Orders.Any(i => i.Id == o.Id)).ToList();
-			foreach (var element in cust.Orders)
-			{
-				element.Product.Increase();
-			}
-			Updatediscount();
-			cust.Closed = false;
-		}
+		
 
 		internal List<PriceSummary> GetProductPriceSummary(Product product)
 		{

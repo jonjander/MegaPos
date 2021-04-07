@@ -164,6 +164,26 @@ namespace MegaPOS.Service
             await DatabaseContext.SaveChangesAsync();
         }
 
+        internal async Task RemoveProduct(string orderId, string customerId)
+        {
+            var customer = await DatabaseContext.Set<Customer>()
+                .FirstOrDefaultAsync(_ => _.Id == customerId && _.Closed != true);
+
+            if (customer != null)
+                return;
+
+            customer.Orders = customer.Orders
+                .Where(_ => _.Id != orderId)
+                .ToList();
+
+            var order = await DatabaseContext.Set<Order>()
+                .FirstOrDefaultAsync(_ => _.Id == orderId);
+
+            order.Product.Increase();
+            Store.Updatediscount();
+            await DatabaseContext.SaveChangesAsync();
+        }
+
         internal async Task ChangeProductLocalProfit(string productId, float localProfit)
         {
             var product = await DatabaseContext.Set<Product>().FirstOrDefaultAsync(_ => _.Id == productId);
