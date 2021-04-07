@@ -15,7 +15,6 @@ using MegaPOS.Model.Commands;
 using MegaPOS.Model.vm;
 using MegaPOS.Model.Events;
 using MegaPOS.Shared.ModalComponents.CheckoutModalComponent;
-using MegaPOS.Shared.ModalComponents;
 
 namespace MegaPOS.Pages.Pos
 {
@@ -135,7 +134,10 @@ namespace MegaPOS.Pages.Pos
 
         protected async Task RemoveProduct(string orderId, string customerId)
         {
-            await posState.RemoveProduct(orderId, customerId);
+            await posState.RemoveProduct(orderId, customerId, hubConnection);
+            Customer.Orders = Customer.Orders
+                .Where(_ => _.Id != orderId)
+                .ToList();
         }
     }
 }

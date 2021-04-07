@@ -13,6 +13,7 @@
 @code {
     [Parameter]public ProductVm Model { get; set; }
     [Parameter]public EventCallback<ProductVm> OnBuyProduct { get; set; }
+    [Inject] public PosState posState { get; set; }
 
     private async Task BuyProduct()
     {
@@ -22,5 +23,31 @@
         }
     }
 
+    public void Dispose()
+    {
+        posState.UpdateRow.Remove(Update);
+    }
 
+    protected override void OnInitialized()
+    {
+        posState.UpdateRow.Add(Update);
+    }
+
+    public async Task Update(IUpdateRow updated)
+    {
+        if (updated.ProductId == Model.ProductId)
+        {
+            if (updated is UpdateRowPrice)
+            {
+                var updatedprice = updated as UpdateRowPrice;
+                Model.Price = updatedprice.NewPrice;
+            } else if (updated is UpdateRowQuantity)
+            {
+                var u = updated as UpdateRowQuantity;
+                Model.Quantity = u.Quantity;
+            }
+        }
+
+    }
+}
 }

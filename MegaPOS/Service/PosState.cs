@@ -78,10 +78,6 @@ namespace MegaPOS.Service
                 change.NewPrice = item.Price;
                 change.NewQuantity = item.Quantity;
             }
-            changeEvent = changeEvent
-                .Where(_ =>
-                _.NewPrice != _.OldPrice)
-                .ToList();
 
             foreach (var item in changeEvent)
             {
@@ -164,12 +160,23 @@ namespace MegaPOS.Service
             await DatabaseContext.SaveChangesAsync();
         }
 
-        internal async Task RemoveProduct(string orderId, string customerId)
+        internal async Task RemoveProduct(string orderId, string customerId, HubConnection hubConnection)
         {
+            var storeProducts = await DatabaseContext.Set<Product>()
+                .Where(_ => _.StoreId == StoreId)
+                .ToListAsync();
+            var changeEvent = storeProducts.Select(_ =>
+                new PriceChangeEvent
+                {
+                    ProductId = _.Id,
+                    OldPrice = _.Price,
+                    NewQuantity = _.Quantity
+                }).ToList();
+
             var customer = await DatabaseContext.Set<Customer>()
                 .FirstOrDefaultAsync(_ => _.Id == customerId && _.Closed != true);
 
-            if (customer != null)
+            if (customer == null)
                 return;
 
             customer.Orders = customer.Orders
@@ -180,8 +187,23 @@ namespace MegaPOS.Service
                 .FirstOrDefaultAsync(_ => _.Id == orderId);
 
             order.Product.Increase();
+            await DatabaseContext.SaveChangesAsync();
             Store.Updatediscount();
             await DatabaseContext.SaveChangesAsync();
+
+            foreach (var item in storeProducts)
+            {
+                var change = changeEvent.FirstOrDefault(_ => _.ProductId == item.Id);
+                change.NewPrice = item.Price;
+                change.NewQuantity = item.Quantity;
+            }
+
+            foreach (var item in changeEvent)
+            {
+                item.StoreId = StoreId;
+                await hubConnection.SendAsync(nameof(MessageHub.SendPriceChanged), item);
+            }
+
         }
 
         internal async Task ChangeProductLocalProfit(string productId, float localProfit)
@@ -266,11 +288,11 @@ namespace MegaPOS.Service
                 change.NewPrice = item.Price;
                 change.NewQuantity = item.Quantity;
             }
-            changeEvent = changeEvent
-                .Where(_ =>
-                _.NewPrice != _.OldPrice ||
-                _.ProductId == p.Id)
-                .ToList();
+            //changeEvent = changeEvent
+            //    .Where(_ =>
+            //    _.NewPrice != _.OldPrice ||
+            //    _.ProductId == p.Id)
+            //    .ToList();
 
             return changeEvent;
         }
@@ -352,6 +374,17 @@ namespace MegaPOS.Service
                 ProductId = productId,
                 OldPrice = oldPrice,
                 NewPrice = newPrice
+            };
+
+            await Task.WhenAll(UpdateRow.Select(_ => _.Invoke(command)));
+        }
+
+        public async Task QuantityChanged(string productId, int newQuantity)
+        {
+            var command = new UpdateRowQuantity
+            {
+                ProductId = productId,
+                Quantity = newQuantity
             };
 
             await Task.WhenAll(UpdateRow.Select(_ => _.Invoke(command)));

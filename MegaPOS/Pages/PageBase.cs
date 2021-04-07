@@ -82,6 +82,11 @@ namespace MegaPOS.Pages
                             await posState.PriceChanged(item.ProductId, item.Price, item.Price);
                     }
 
+                    foreach (var item in Model.Products)
+                    {
+                        await posState.QuantityChanged(item.ProductId, item.Quantity);
+                    }
+
                 }
             });
 
