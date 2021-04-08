@@ -36,7 +36,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        model = await posState.LoadOpenCustomers();
+        model = new List<CustomerVm>();
     }
 
     public async Task OpenCustomer(string customer)

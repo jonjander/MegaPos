@@ -89,7 +89,8 @@ namespace MegaPOS.Pages.Pos
 
         protected async Task ChangeCustomerName(string value)
         {
-            Customer.Name = await posState.SaveCustomerName(Customer.Id, value);
+            Customer.Name = value;
+            await posState.SaveCustomerName(Customer.Id, value);
         }
 
         protected async Task BuyProduct(ProductVm product)

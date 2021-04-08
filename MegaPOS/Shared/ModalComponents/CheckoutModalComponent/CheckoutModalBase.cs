@@ -57,6 +57,7 @@ namespace MegaPOS.Shared.ModalComponents.CheckoutModalComponent
         {
             while (stage != CheckoutStages.TerminalSelected)
             {
+                //todo timeout
                 if (hubConnection.State == HubConnectionState.Connected)
                 {
                     await RequestTerminal();

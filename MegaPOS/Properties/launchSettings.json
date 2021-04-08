@@ -12,7 +12,9 @@
       "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "VaultUri": "https://megaposvault.vault.azure.net/",
+        "AZURE_USERNAME": "jon.jander@altitude365.com"
       }
     },
     "MegaPOS": {
@@ -20,7 +22,9 @@
       "launchBrowser": true,
       "launchUrl": "test",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "VaultUri": "https://megaposvault.vault.azure.net/",
+        "AZURE_USERNAME": "jon.jander@altitude365.com"
       },
       "dotnetRunMessages": "true",
       "applicationUrl": "https://localhost:5001"
@@ -30,7 +34,9 @@
       "launchBrowser": true,
       "launchUrl": "test/board",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "VaultUri": "https://megaposvault.vault.azure.net/",
+        "AZURE_USERNAME": "jon.jander@altitude365.com"
       },
       "dotnetRunMessages": "true",
       "applicationUrl": "https://localhost:5001"
@@ -40,7 +46,9 @@
       "launchBrowser": true,
       "launchUrl": "test/terminal/t0",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "VaultUri": "https://megaposvault.vault.azure.net/",
+        "AZURE_USERNAME": "jon.jander@altitude365.com"
       },
       "dotnetRunMessages": "true",
       "applicationUrl": "https://localhost:5001"
@@ -50,7 +58,11 @@
       "launchBrowser": true,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
       "publishAllPorts": true,
-      "useSSL": true
+      "useSSL": true,
+      "environmentVariables": {
+        "VaultUri": "https://megaposvault.vault.azure.net/",
+        "AZURE_USERNAME": "jon.jander@altitude365.com"
+      }
     }
   }
 }

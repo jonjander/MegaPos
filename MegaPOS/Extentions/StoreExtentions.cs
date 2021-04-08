@@ -99,6 +99,19 @@ namespace MegaPOS.Extentions
             if (string.IsNullOrEmpty(value)) return value;
             return value.Length <= maxLength ? value : value.Substring(0, maxLength);
         }
+        public static QueueWrapper<T> Wrap<T>(this T obj)
+            => new QueueWrapper<T> { Object = obj };
 
+        public static void DropFist<T>(this QueueWrapper<List<T>> wrapper)
+        {
+            var topValue = wrapper.Object.FirstOrDefault();
+            wrapper.Object = wrapper.Object.Where(l => !l.Equals(topValue)).ToList();
+        }
+
+        public static T PopFist<T>(this QueueWrapper<List<T>> wrapper)
+        {
+            var topValue = wrapper.Object.FirstOrDefault();
+            return topValue;
+        }
     }
 }

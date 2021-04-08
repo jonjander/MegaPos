@@ -15,6 +15,8 @@ using MegaPOS.Model.vm;
 using MegaPOS.Model.Commands;
 using MegaPOS.Model.Events;
 using MegaPOS.Enum;
+using System.Threading;
+using Microsoft.Extensions.Logging;
 
 namespace MegaPOS.Service
 {
@@ -23,6 +25,7 @@ namespace MegaPOS.Service
     public class PosState
     {
         private readonly DatabaseContext DatabaseContext;
+        private readonly ILogger<PosState> logger;
 
         public List<Func<IUpdateRow, Task>> UpdateRow { get; set; } = new List<Func<IUpdateRow, Task>>();
         private Store Store { get; set; }
@@ -96,20 +99,33 @@ namespace MegaPOS.Service
         }
 
         private bool savingCustomerName { get; set; }
-        private string lastSavedName { get; set; }
-        internal async Task<string> SaveCustomerName(string id, string value)
+        private QueueWrapper<List<Func<Task<string>>>> NameWriteTasks { get; set; } = new QueueWrapper<List<Func<Task<string>>>> { Object = new List<Func<Task<string>>>() };
+
+        private async Task<string> SaveName(string id, string value)
         {
-            if (savingCustomerName)
-                return lastSavedName;
-            savingCustomerName = true;
-            var customer = await DatabaseContext
-                .Set<Customer>()
-                .FirstOrDefaultAsync(_ => _.Id == id);
-            customer.Name = value;
-            await DatabaseContext.SaveChangesAsync();
-            lastSavedName = value;
-            savingCustomerName = false;
-            return customer.Name;
+            try
+            {
+                var customer = await DatabaseContext
+                    .Set<Customer>()
+                    .FirstOrDefaultAsync(_ => _.Id == id);
+                customer.Name = value;
+                await DatabaseContext.SaveChangesAsync();
+                logger.LogInformation($"Wrote {value}");
+                return customer.Name;
+            } catch (Exception ex)
+            {
+                logger.LogError(ex, $"{ex.Message}");
+                return value;
+            }
+        }
+
+        private DbDebouncer<string> SaveCustomerNameDebouncer = new DbDebouncer<string>();
+
+        internal async Task SaveCustomerName(string id, string value)
+        {
+            Func<Task<string>> editTask = () => SaveName(id, value);
+            await SaveCustomerNameDebouncer.PoolAndRun(editTask);
+
         }
 
         internal async Task ChangeProductName(string productId, string name, HubConnection hubConnection)
@@ -254,9 +270,11 @@ namespace MegaPOS.Service
         }
 
         public PosState(
-            DatabaseContext databaseContext)
+            DatabaseContext databaseContext,
+            ILogger<PosState> logger)
         {
             DatabaseContext = databaseContext;
+            this.logger = logger;
         }
 
         public async Task Init(string name)
