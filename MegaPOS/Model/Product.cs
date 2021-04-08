@@ -22,8 +22,8 @@ namespace MegaPOS.Model
 
 		//public float Price => GetPrice();
 
-		public float Price;
-		
+		public float Price { get; set; }
+
 		private float Weight => ProductsSold / (float)Store.TotalProductsSold;
 		private float ClampedWeight => Weight.Map(0, 0.5f, 1, -1);
 		private float GlobalProfit => Store?.ProfitTarget ?? 1.1f;

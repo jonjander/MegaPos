@@ -21,10 +21,14 @@ namespace MegaPOS
             Host.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration((context, config) =>
                 {
-                var keyVaultEndpoint = new Uri(Environment.GetEnvironmentVariable("VaultUri"));
-                    config.AddAzureKeyVault(
-                    keyVaultEndpoint,
-                    new DefaultAzureCredential());
+                    var keyvaultUri = Environment.GetEnvironmentVariable("VaultUri");
+                    if (!string.IsNullOrEmpty(keyvaultUri))
+                    {
+                        var keyVaultEndpoint = new Uri(Environment.GetEnvironmentVariable("VaultUri"));
+                        config.AddAzureKeyVault(
+                            keyVaultEndpoint,
+                            new DefaultAzureCredential());
+                    }
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {

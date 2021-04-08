@@ -405,6 +405,7 @@ namespace MegaPOS.Service
 
         internal async Task<List<ProductVm>> GetAllProducts(string storeId)
         {
+            DatabaseContext.UpdateProductPrice(StoreId);
             var result = await DatabaseContext.Set<Product>()
                          .Where(_ => _.StoreId == storeId)
                          .ToListAsync();
