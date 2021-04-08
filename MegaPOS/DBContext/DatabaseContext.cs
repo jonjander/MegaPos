@@ -56,7 +56,7 @@ namespace MegaPOS.DBContext
 
             modelBuilder.Entity<Order>()
                 .HasOne(_ => _.Product)
-                .WithMany()
+                .WithMany(_=>_.Orders)
                 .HasForeignKey(_=>_.ProductId);
 
 

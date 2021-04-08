@@ -20,13 +20,17 @@ namespace MegaPOS.Model
 		public float Discount { get; set; } = 0;
 		public float MinPriceProcentage { get; set; } = 0.9f;
 
-		public float Price => GetPrice();
+		//public float Price => GetPrice();
+
+		public float Price;
 		
 		private float Weight => ProductsSold / (float)Store.TotalProductsSold;
 		private float ClampedWeight => Weight.Map(0, 0.5f, 1, -1);
 		private float GlobalProfit => Store?.ProfitTarget ?? 1.1f;
 
-		public void UpdateMinPrice(float procentage)
+        public List<Order> Orders { get; set; }
+
+        public void UpdateMinPrice(float procentage)
 		{
 			MinPriceProcentage = procentage;
 		}
@@ -55,8 +59,6 @@ namespace MegaPOS.Model
 			OriginalPrice = price;
 			LocalProfit = GlobalProfit * 1.01f;
 		}
-
-		
 
 		public void SetQuantity(string value)
 		{

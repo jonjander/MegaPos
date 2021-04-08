@@ -71,8 +71,9 @@ namespace MegaPOS.Service
             await DatabaseContext.SaveChangesAsync();
 
             //Update prices
-            Store.Updatediscount();
-            await DatabaseContext.SaveChangesAsync();
+            //Store.Updatediscount();
+            //await DatabaseContext.SaveChangesAsync();
+            DatabaseContext.UpdateProductPrice(StoreId);
 
             //Report
             foreach (var item in storeProducts)
@@ -157,8 +158,9 @@ namespace MegaPOS.Service
             var product = await DatabaseContext.Set<Product>().FirstOrDefaultAsync(_ => _.Id == productId);
             product.UpdateMinPrice(minPriceProcentage);
             await DatabaseContext.SaveChangesAsync();
-            Store.Updatediscount();
-            await DatabaseContext.SaveChangesAsync();
+            //Store.Updatediscount();
+            //await DatabaseContext.SaveChangesAsync();
+            DatabaseContext.UpdateProductPrice(StoreId);
 
             foreach (var item in storeProducts)
             {
@@ -238,8 +240,10 @@ namespace MegaPOS.Service
 
             order.Product.Increase();
             await DatabaseContext.SaveChangesAsync();
-            Store.Updatediscount();
-            await DatabaseContext.SaveChangesAsync();
+            //Store.Updatediscount();
+            //await DatabaseContext.SaveChangesAsync();
+            DatabaseContext.UpdateProductPrice(StoreId);
+
 
             foreach (var item in storeProducts)
             {
@@ -332,7 +336,9 @@ namespace MegaPOS.Service
             c.LäggTillOrer(order);
 
             Store.Orders.Add(order);
-            Store.Updatediscount();
+            //Store.Updatediscount();
+
+            DatabaseContext.UpdateProductPrice(StoreId);
 
             foreach (var item in storeProducts)
             {
