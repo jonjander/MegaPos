@@ -129,9 +129,10 @@ namespace MegaPOS.Pages.Pos
                 .ToList();
         }
 
-        protected async Task OpenEditModal(ProductVm product)
+        protected void OpenEditModal(ProductVm product)
         {
-            changeProductModal.ShowModal(product);
+            ProductVm loadedproduct = ExekveraSync(_ => _.GetProduct(product.ProductId));
+            changeProductModal.ShowModal(loadedproduct);
         }
     }
 }

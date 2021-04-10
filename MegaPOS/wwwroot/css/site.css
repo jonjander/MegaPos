@@ -73,18 +73,30 @@ a, .btn-link {
 }
 
 .cart-container {
+    height: 80vh;
+}
+
+.cart-rows-container {
+    margin-top: 20px;
     display: flex;
     flex-wrap: wrap;
     flex-direction: column;
+    max-height: 90%;
+    min-height: 85%;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 .cart-checkout {
-    align-self:end;
+    align-self: end;
 }
 
 .product-container {
     display: flex;
     flex-wrap: wrap;
+    max-height: 80vh;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 .product-card {
@@ -129,4 +141,26 @@ a, .btn-link {
     padding-bottom: 0px;
     padding-left: 32px;
     padding-top: 17px;
+}
+
+.pos-foot {
+    height: 5vh;
+}
+
+
+.pos-body {
+    height: 85vh;
+}
+
+
+.pos-head {
+    height: 5vh;
+}
+
+.cart-delete {
+    transform: scale(0.5) translateY(-50%);
+}
+
+.cart-row {
+    height: 23px
 }

@@ -478,5 +478,9 @@ namespace MegaPOS.Service
             return customers.ToVm();
         }
 
+        public ProductVm GetProduct (string id)
+            => DatabaseContext.Products.FirstOrDefault(_ => _.Id == id).ToVm();
+        
+
     }
 }

@@ -32,9 +32,10 @@ namespace MegaPOS.Model.Commands
         public bool IsValid()
         {
             return MinPriceProcentage > 0f &&
-                MinPriceProcentage <= 1f &&
+                MinPriceProcentage <= 10f &&
                 Quantity >= 0f &&
-                LocalProfit > 1f &&
+                LocalProfit > 0f &&
+                LocalProfit <= 10f &&
                 !string.IsNullOrEmpty(Name);
         }
     }

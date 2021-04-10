@@ -31,7 +31,7 @@ namespace MegaPOS.Service
     {
         public async Task SendProductAdded(ProductAddedEvent productAddedEvent)
         {
-            await Clients.Others.SendAsync(SendMethods.ProductAdded.ToString(), productAddedEvent);
+            await Clients.All.SendAsync(SendMethods.ProductAdded.ToString(), productAddedEvent);
         }
         public async Task SendPriceChanged(PriceChangeEvent priceChangeEvent)
         {
@@ -80,7 +80,7 @@ namespace MegaPOS.Service
 
         public async Task SendProductNameChanged(ProductNameChanged Event)
         {
-            await Clients.Others.SendAsync(SendMethods.ProductNameChange.ToString(), Event);
+            await Clients.All.SendAsync(SendMethods.ProductNameChange.ToString(), Event);
         }
 
         public static HubConnection SetupMessageHub(NavigationManager NavigationManager)

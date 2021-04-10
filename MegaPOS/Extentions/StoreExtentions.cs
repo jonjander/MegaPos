@@ -5,9 +5,12 @@ using MegaPOS.Model.Events;
 using MegaPOS.Model.vm;
 using MegaPOS.Pages.Leaderboard;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace MegaPOS.Extentions
@@ -120,36 +123,27 @@ namespace MegaPOS.Extentions
 
         public static float UpdateProductPrice(this Store store, string productId)
         {
-            //var store = db.Set<Store>()
-            //    .AsSplitQuery()
-            //    .Include(_ => _.Products)
-            //    .ThenInclude(_ => _.Orders)
-            //    .FirstOrDefault(_ => _.Id == storeId);
-
             float globalProfit = store.ProfitTarget;
             float totalProductsInStore = store.Orders.Where(_ => _.Type == OrderType.Assets).Count();
             float antalUnikaProdukter = store.Products.Count;
 
-            //var products = db.Set<Product>()
-            //    .AsSplitQuery()
-            //    .Include(_ => _.Orders)
-            //    .Where(_ => _.StoreId == storeId);
-
             var products = store.Products;
-
+            //todo do not calc all every time
             var stage1 = products
                 .Select(_ => new
                 {
                     _.Id,
+                    _.MinPriceProcentage,
                     _.OriginalPrice,
                     _.Quantity,
-                    _.LocalProfit,
+                    LocalProfit = (_.LocalProfit + globalProfit) / 2f,
                     _.Orders,
                     TotalNumber = _.Quantity + _.ProductsSold,
                     NumberSold = _.ProductsSold,
                 }).Select(_ => new
                 {
                     _.Id,
+                    _.MinPriceProcentage,
                     _.OriginalPrice,
                     _.Quantity,
                     _.LocalProfit,
@@ -158,69 +152,104 @@ namespace MegaPOS.Extentions
                     _.Orders,
                     PercentageSold = _.NumberSold / _.TotalNumber,
                     Popularity = _.NumberSold / totalProductsInStore
-                });
+                }).ToList();
 
-            var PercentageSoldTotal = stage1.Sum(_ => _.PercentageSold) + 0.0001f;
-            var PopularityTotal = stage1.Sum(_ => _.Popularity) + 0.0001f;
+            var keys = stage1.OrderBy(_ => _.Id).Select(_ => $"{_.NumberSold}{_.LocalProfit}{_.TotalNumber}");
+            var statKey = string.Join("", keys);
+            var cahcekey = $"{statKey}{globalProfit}{totalProductsInStore}{antalUnikaProdukter}";
 
-            var stage2 = stage1.Select(_ => new
+            using var md5 = MD5.Create();
+            byte[] inputBytes = Encoding.ASCII.GetBytes(cahcekey);
+            byte[] hashBytes = md5.ComputeHash(inputBytes);
+
+            // Convert the byte array to hexadecimal string
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < hashBytes.Length; i++)
             {
-                _.Id,
-                _.OriginalPrice,
-                _.Quantity,
-                _.LocalProfit,
-                _.TotalNumber,
-                _.NumberSold,
-                _.Orders,
-                h = _.PercentageSold / PercentageSoldTotal,
-                hshift = (_.PercentageSold / PercentageSoldTotal) - (1f / antalUnikaProdukter),
-                w = _.Popularity / PopularityTotal,
-                wshift = (_.Popularity / PopularityTotal) - (1f / antalUnikaProdukter)
-            }).Select(_ => new {
-                _.Id,
-                _.OriginalPrice,
-                _.Quantity,
-                _.LocalProfit,
-                npw = 1f + _.wshift,
-                nph = 1f + _.hshift,
-                npwh = (2f + _.wshift + _.hshift) / 2f,
-                hwshift = (_.hshift + _.wshift) / 2f,
-                PlannedProfit = _.OriginalPrice * _.TotalNumber * _.LocalProfit,
-                PlannedProfitNow = _.OriginalPrice * _.NumberSold * _.LocalProfit,
-                Gains = _.Orders.Where(_ => _.Type == OrderType.Revenues).Sum(_ => _.Credit)
-            }).Select(_ => new {
-                _.Id,
-                _.Quantity,
-                _.npwh,
-                _.hwshift,
-                _.LocalProfit,
-                Margin = _.Gains - _.PlannedProfitNow,
-                Left = _.PlannedProfit - _.Gains,
-                LeftPerProduct = (_.PlannedProfit - _.Gains) / _.Quantity
-            }).ToList();
-
-            var totalMargin = stage2.Sum(_ => _.Margin);
-
-            var stage5 = stage2.Select(_ => new
+                sb.Append(hashBytes[i].ToString("X2"));
+            }
+            var cahcekeyHash = sb.ToString();
+            
+            if (!Global.memoryCache.TryGetValue(cahcekeyHash, out List<PriceCalc> stage5))
             {
-                _.Id,
-                NewPriceNoDiscount = _.LeftPerProduct * _.npwh * _.LocalProfit,
-                Discount = totalMargin * -_.hwshift
-            }).Select(_ => new
+                var PercentageSoldTotal = stage1.Sum(_ => _.PercentageSold) + 0.0001f;
+                var PopularityTotal = stage1.Sum(_ => _.Popularity) + 0.0001f;
+
+                var stage2 = stage1.Select(_ => new
+                {
+                    _.Id,
+                    _.MinPriceProcentage,
+                    _.OriginalPrice,
+                    _.Quantity,
+                    _.LocalProfit,
+                    _.TotalNumber,
+                    _.NumberSold,
+                    _.Orders,
+                    h = _.PercentageSold / PercentageSoldTotal,
+                    hshift = (_.PercentageSold / PercentageSoldTotal) - (1f / antalUnikaProdukter),
+                    w = _.Popularity / PopularityTotal,
+                    wshift = (_.Popularity / PopularityTotal) - (1f / antalUnikaProdukter)
+                }).Select(_ => new {
+                    _.Id,
+                    _.MinPriceProcentage,
+                    _.OriginalPrice,
+                    _.Quantity,
+                    _.LocalProfit,
+                    npw = 1f + _.wshift,
+                    nph = 1f + _.hshift,
+                    npwh = (2f + _.wshift + _.hshift) / 2f,
+                    hwshift = (_.hshift + _.wshift) / 2f,
+                    PlannedProfit = _.OriginalPrice * _.TotalNumber * _.LocalProfit,
+                    PlannedProfitNow = _.OriginalPrice * _.NumberSold * _.LocalProfit,
+                    Gains = _.Orders.Where(_ => _.Type == OrderType.Revenues).Sum(_ => _.Credit)
+                }).Select(_ => new {
+                    _.Id,
+                    _.MinPriceProcentage,
+                    _.OriginalPrice,
+                    _.Quantity,
+                    _.npwh,
+                    _.hwshift,
+                    _.LocalProfit,
+                    Margin = _.Gains - _.PlannedProfitNow,
+                    Left = _.PlannedProfit - _.Gains,
+                    LeftPerProduct = (_.PlannedProfit - _.Gains) / _.Quantity
+                }).ToList();
+
+                var totalMargin = stage2.Sum(_ => _.Margin);
+
+                stage5 = stage2.Select(_ => new
+                {
+                    _.Id,
+                    _.MinPriceProcentage,
+                    _.OriginalPrice,
+                    NewPriceNoDiscount = _.LeftPerProduct * _.npwh * _.LocalProfit,
+                    Discount = totalMargin * -_.hwshift
+                }).Select(_ => new PriceCalc
+                {
+                    Id = _.Id,
+                    MinPriceProcentage = _.MinPriceProcentage,
+                    OriginalPrice = _.OriginalPrice,
+                    Price = _.NewPriceNoDiscount - _.Discount
+                }).ToList();
+
+                // Set cache options.
+                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                    // Keep in cache for this time, reset time if accessed.
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(1));
+                Global.memoryCache.Set(cahcekeyHash, stage5, cacheEntryOptions);
+            } else
             {
-                _.Id,
-                Price = _.NewPriceNoDiscount - _.Discount
-            }).ToList();
+
+            }
 
             var updateProducts = products.ToList();
+            var slectedProduct = stage5.FirstOrDefault(_ => _.Id == productId);
+            var calculatedPrice = slectedProduct?.Price ?? 0;
+            var minPrice = slectedProduct.OriginalPrice * slectedProduct.MinPriceProcentage;
+            if (calculatedPrice < minPrice)
+                calculatedPrice = minPrice;
+            return calculatedPrice;
 
-            return stage5.FirstOrDefault(_ => _.Id == productId)?.Price ?? 0;
-
-            //foreach (var item in updateProducts)
-            //{
-            //    item._Price = stage5.FirstOrDefault(_ => _.Id == item.Id)?.Price ?? 0f;
-            //}
-            //db.SaveChanges();
         }
     }
 }

@@ -1,7 +1,9 @@
 ﻿using MegaPOS.Extentions;
+using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -76,6 +78,7 @@ namespace MegaPOS.Model
 		{
 			LocalProfit = profit;
 		}
+
 
 		private float GetPrice()
 		{

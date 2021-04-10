@@ -16,7 +16,7 @@
                     <FieldLabel>Min price percentage</FieldLabel>
                     <NumericEdit @bind-Value="@model.MinPriceProcentage"
                                  Min="0.1f"
-                                 Max="1f"
+                                 Max="10f"
                                  Placeholder="Price" />
                 </Field>
                 <Field>
@@ -28,7 +28,7 @@
                     <FieldLabel>Local profit</FieldLabel>
                     <NumericEdit @bind-Value="@model.LocalProfit"
                                  Min="0.1f"
-                                 Max="99f"
+                                 Max="10f"
                                  Placeholder="Local profit" />
                 </Field>
             </ModalBody>

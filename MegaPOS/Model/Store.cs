@@ -2,6 +2,7 @@
 using MegaPOS.Enum;
 using MegaPOS.Extentions;
 using MegaPOS.Model.Events;
+using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -26,7 +27,8 @@ namespace MegaPOS.Model
 		public float ProfitMargin => Balance - PlannedProfit;
 		public float ProfitMarginAndTip => ProfitMargin + (Tip * TipPayback);
 		private float TipPayback = 0.5f;
-		private float Tip { get; set; }
+
+        private float Tip { get; set; }
 		public float AssetProfitMarginShare
 			=> ProfitMarginAndTip / Products?.Sum(ap => ap.Quantity) ?? 1;
 		public float SoldProfitMarginShare
