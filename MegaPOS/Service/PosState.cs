@@ -301,7 +301,7 @@ namespace MegaPOS.Service
             if (existing == null)
             {
                 existing = new Store(1.1f, name);
-                DatabaseContext.Add(existing);
+                DatabaseContext.AddStore(existing);
                 DatabaseContext.SaveChanges();
             }
             Store = existing;
@@ -403,7 +403,7 @@ namespace MegaPOS.Service
                 StoreId = StoreId
             };
       
-            var item = DatabaseContext.Add(p);
+            var item = DatabaseContext.AddProduct(p);
             Store.AddProduct(p);
 
             DatabaseContext.SaveChanges();

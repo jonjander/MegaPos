@@ -127,7 +127,12 @@ namespace MegaPOS.DBContext
             return base.Add(entity);
         }
 
-        public override EntityEntry<TEntity> Add<TEntity>(TEntity entity)
+        public EntityEntry<Product> AddProduct(Product entity)
+        {
+            return base.Add(entity);
+        }
+
+        public EntityEntry<Store> AddStore(Store entity)
         {
             return base.Add(entity);
         }

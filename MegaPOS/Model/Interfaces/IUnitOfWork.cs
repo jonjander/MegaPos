@@ -15,7 +15,8 @@ namespace MegaPOS.Model.Interfaces
         DbSet<Store> Stores { get; set; }
         DbSet<Order> Orders { get; set; }
         EntityEntry Add(object entity);
-        EntityEntry<TEntity> Add<TEntity>(TEntity entity);
+        EntityEntry<Product> AddProduct(Product entity);
+        EntityEntry<Store> AddStore(Store entity);
         int SaveChanges();
     }
 }
