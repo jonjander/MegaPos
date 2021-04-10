@@ -3,7 +3,7 @@
 @inherits PosBase
 
 <AddProductModal @ref="addProductModal"
-                 StoreId="@posState.StoreId"
+                 StoreId="@StoreId"
                  OnAddProduct="AddProduct"/>
 <CustomersModal @ref="customersModal"
                 OnSelectedCustomer="ChangeCustomer" />
@@ -12,7 +12,7 @@
                OnCustomerPayed="CustomerPayed"/>
 
 <ChangeProductModal @ref="changeProductModal"
-                    StoreId="@posState.StoreId"
+                    StoreId="@StoreId"
                     OnProductChanged="ChangeProduct" />
 
 <Row>

@@ -118,111 +118,109 @@ namespace MegaPOS.Extentions
         }
 
 
-        
-
-        public static void UpdateProductPrice(this DatabaseContext db, string storeId)
+        public static float UpdateProductPrice(this Store store, string productId)
         {
-            var store = db.Set<Store>()
-                .Include(_ => _.Products)
-                .ThenInclude(_ => _.Orders)
-                .FirstOrDefault(_=>_.Id == storeId);
+            //var store = db.Set<Store>()
+            //    .AsSplitQuery()
+            //    .Include(_ => _.Products)
+            //    .ThenInclude(_ => _.Orders)
+            //    .FirstOrDefault(_ => _.Id == storeId);
 
-            var globalProfit = store.ProfitTarget;
-            var totalProductsInStore = store.Orders.Where(_ => _.Type == OrderType.Assets).Count();
-            var antalUnikaProdukter = store.Products.Count;
+            float globalProfit = store.ProfitTarget;
+            float totalProductsInStore = store.Orders.Where(_ => _.Type == OrderType.Assets).Count();
+            float antalUnikaProdukter = store.Products.Count;
 
-            var stage1 = store.Products.Select(_ => new {
-                _,
-                TotalNumber = _.Quantity + _.ProductsSold,
-                NumberSold = _.ProductsSold,
-                Quantity = _.Quantity
-            }).Select(_ => new {
-                _._,
-                _.TotalNumber,
-                _.NumberSold,
-                _.Quantity,
-                PercentageSold = _.NumberSold / _.TotalNumber,
-                Popularity = _.NumberSold / totalProductsInStore
-            }).ToList();
+            //var products = db.Set<Product>()
+            //    .AsSplitQuery()
+            //    .Include(_ => _.Orders)
+            //    .Where(_ => _.StoreId == storeId);
 
-            var PercentageSoldTotal = stage1.Sum(_ => _.PercentageSold);
-            var PopularityTotal = stage1.Sum(_ => _.Popularity);
+            var products = store.Products;
+
+            var stage1 = products
+                .Select(_ => new
+                {
+                    _.Id,
+                    _.OriginalPrice,
+                    _.Quantity,
+                    _.LocalProfit,
+                    _.Orders,
+                    TotalNumber = _.Quantity + _.ProductsSold,
+                    NumberSold = _.ProductsSold,
+                }).Select(_ => new
+                {
+                    _.Id,
+                    _.OriginalPrice,
+                    _.Quantity,
+                    _.LocalProfit,
+                    _.TotalNumber,
+                    _.NumberSold,
+                    _.Orders,
+                    PercentageSold = _.NumberSold / _.TotalNumber,
+                    Popularity = _.NumberSold / totalProductsInStore
+                });
+
+            var PercentageSoldTotal = stage1.Sum(_ => _.PercentageSold) + 0.0001f;
+            var PopularityTotal = stage1.Sum(_ => _.Popularity) + 0.0001f;
 
             var stage2 = stage1.Select(_ => new
             {
-                _._,
+                _.Id,
+                _.OriginalPrice,
+                _.Quantity,
+                _.LocalProfit,
                 _.TotalNumber,
                 _.NumberSold,
-                _.Quantity,
-                _.PercentageSold,
-                _.Popularity,
+                _.Orders,
                 h = _.PercentageSold / PercentageSoldTotal,
-                hshift = (_.PercentageSold / PercentageSoldTotal) - (1 / antalUnikaProdukter),
+                hshift = (_.PercentageSold / PercentageSoldTotal) - (1f / antalUnikaProdukter),
                 w = _.Popularity / PopularityTotal,
-                wshift = (_.Popularity / PopularityTotal) - (1 / antalUnikaProdukter)
-            }).ToList();
-
-            var stage3 = stage2.Select(_=> new { 
-                _._,
-                _.TotalNumber,
-                _.NumberSold,
+                wshift = (_.Popularity / PopularityTotal) - (1f / antalUnikaProdukter)
+            }).Select(_ => new {
+                _.Id,
+                _.OriginalPrice,
                 _.Quantity,
-                _.PercentageSold,
-                _.Popularity,
-                _.h,
-                _.hshift,
-                _.w,
-                _.wshift,
-                npw = 1+_.wshift,
-                nph = 1+_.hshift,
-                npwh = (1 + _.wshift + 1 + _.hshift) / 2,
-                hwshift = (_.hshift + _.wshift) / 2,
-                PlannedProfit = _._.OriginalPrice * _.TotalNumber * (1+_._.LocalProfit),
-                PlannedProfitNow = _._.OriginalPrice * _.NumberSold * (1+ _._.LocalProfit),
-                Gains = _._.Orders.Where(_ => _.Type == OrderType.Revenues).Sum(_ => _.Credit)
-            }).ToList();
-
-            var stage4 = stage3.Select(_ => new {
-                _._,
-                _.TotalNumber,
-                _.NumberSold,
+                _.LocalProfit,
+                npw = 1f + _.wshift,
+                nph = 1f + _.hshift,
+                npwh = (2f + _.wshift + _.hshift) / 2f,
+                hwshift = (_.hshift + _.wshift) / 2f,
+                PlannedProfit = _.OriginalPrice * _.TotalNumber * _.LocalProfit,
+                PlannedProfitNow = _.OriginalPrice * _.NumberSold * _.LocalProfit,
+                Gains = _.Orders.Where(_ => _.Type == OrderType.Revenues).Sum(_ => _.Credit)
+            }).Select(_ => new {
+                _.Id,
                 _.Quantity,
-                _.PercentageSold,
-                _.Popularity,
-                _.h,
-                _.hshift,
-                _.w,
-                _.wshift,
-                _.npw,
-                _.nph,
                 _.npwh,
                 _.hwshift,
-                _.PlannedProfit,
-                _.PlannedProfitNow,
-                _.Gains,
+                _.LocalProfit,
                 Margin = _.Gains - _.PlannedProfitNow,
                 Left = _.PlannedProfit - _.Gains,
                 LeftPerProduct = (_.PlannedProfit - _.Gains) / _.Quantity
             }).ToList();
 
-            var totalMargin = stage4.Sum(_ => _.Margin);
+            var totalMargin = stage2.Sum(_ => _.Margin);
 
-            var stage5 = stage4.Select(_ => new
+            var stage5 = stage2.Select(_ => new
             {
-                _._,
-                NewPriceNoDiscount = _.Left * _.npwh * (1 + _._.LocalProfit),
-                Discount = totalMargin * -(_.hwshift)
+                _.Id,
+                NewPriceNoDiscount = _.LeftPerProduct * _.npwh * _.LocalProfit,
+                Discount = totalMargin * -_.hwshift
             }).Select(_ => new
             {
-                _._,
+                _.Id,
                 Price = _.NewPriceNoDiscount - _.Discount
-            });
+            }).ToList();
 
-            foreach (var item in stage5)
-            {
-                item._.Price = item.Price;
-            }
-            db.SaveChanges();
+            var updateProducts = products.ToList();
+
+            return stage5.FirstOrDefault(_ => _.Id == productId)?.Price ?? 0;
+
+            //foreach (var item in updateProducts)
+            //{
+            //    item._Price = stage5.FirstOrDefault(_ => _.Id == item.Id)?.Price ?? 0f;
+            //}
+            //db.SaveChanges();
         }
     }
 }
