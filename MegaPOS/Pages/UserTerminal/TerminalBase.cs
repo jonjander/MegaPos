@@ -50,10 +50,10 @@ namespace MegaPOS.Pages.UserTerminal
             base.SetupMessageHub();
             hubConnection.On<FindTerminalEvent>(SendMethods.FindTerminal.ToString(), async (Event) =>
             {
-                if (posState.StoreId == Event.StoreId && !IsInUse && !string.IsNullOrEmpty(name))
+                if (StoreId == Event.StoreId && !IsInUse && !string.IsNullOrEmpty(name))
                 {
                     await hubConnection.SendAsync(nameof(MessageHub.SendTeminalFound), new TerminalFoundEvent { 
-                        StoreId = posState.StoreId,
+                        StoreId = StoreId,
                         ConnectionId = hubConnection.ConnectionId,
                         TerminalId = name,
                         CustomerId = Event.CustomerId
@@ -62,14 +62,14 @@ namespace MegaPOS.Pages.UserTerminal
             });
 
             hubConnection.On<OpenTermnialEvent>(SendMethods.OpenTerminal.ToString(), async (Event) => {
-                if (posState.StoreId == Event.StoreId && name == Event.TerminalId)
+                if (StoreId == Event.StoreId && name == Event.TerminalId)
                 {
                     if (!IsInUse)
                     {
                         IsInUse = true;
                         await hubConnection.SendAsync(nameof(MessageHub.SendOpenTerminalConfirmation), new OpenTerminalConfirmationEvent
                         {
-                            StoreId = posState.StoreId,
+                            StoreId = StoreId,
                             TerminalId = name,
                             CustomerId = Event.CustomerId
                         });
@@ -77,7 +77,7 @@ namespace MegaPOS.Pages.UserTerminal
                 }
             });
             hubConnection.On<CloseTerminalEvent>(SendMethods.CloseTerminal.ToString(), async (Event) => {
-                if (posState.StoreId == Event.StoreId && name == Event.TerminalId)
+                if (StoreId == Event.StoreId && name == Event.TerminalId)
                 {
                     IsInUse = false;
                     DisplaySummary = false;
@@ -87,7 +87,7 @@ namespace MegaPOS.Pages.UserTerminal
             });
 
             hubConnection.On<TerminalSummaryEvent>(SendMethods.TerminalSummary.ToString(), async (Event) => {
-                if (posState.StoreId == Event.StoreId && name == Event.TerminalId && IsInUse)
+                if (StoreId == Event.StoreId && name == Event.TerminalId && IsInUse)
                 {
                     Orders = Event.Orders;
                     GenereateQRCode(Event.CustomerId);

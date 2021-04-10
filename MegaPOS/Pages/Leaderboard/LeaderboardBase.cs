@@ -12,8 +12,8 @@ namespace MegaPOS.Pages.Leaderboard
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
-            posState.OnProductAddedRemoved += ProductAdded;
-            posState.OnProductPriceChanged += RefreshPriceState;
+            ExekveraSync(posState => posState.OnProductAddedRemoved += ProductAdded);
+            ExekveraSync(posState => posState.OnProductPriceChanged += RefreshPriceState);
         }
 
         private void ProductAdded(object sender, EventArgs e)
@@ -37,8 +37,8 @@ namespace MegaPOS.Pages.Leaderboard
 
         public override void Dispose()
         {
-            posState.OnProductAddedRemoved -= RefreshPriceState;
-            posState.OnProductPriceChanged -= RefreshPriceState;
+            ExekveraSync(posState => posState.OnProductAddedRemoved -= RefreshPriceState);
+            ExekveraSync(posState => posState.OnProductPriceChanged -= RefreshPriceState);
             base.Dispose();
         }
 

@@ -1,17 +1,20 @@
 ﻿using Azure.Core;
 using Azure.Identity;
 using MegaPOS.Model;
+using MegaPOS.Model.Interfaces;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MegaPOS.DBContext
 {
-    public class DatabaseContext : DbContext
+    public class DatabaseContext : DbContext, IUnitOfWork
     {
         private readonly DefaultAzureCredential azureSqlAuthTokenService;
         private readonly IConfiguration configuration;
@@ -36,9 +39,12 @@ namespace MegaPOS.DBContext
                 optionsBuilder.UseSqlServer(connection);
             }
         }
+ 
 
         public DbSet<Store> Stores { get; set; }
         public DbSet<Customer> Customers { get; set; }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<Order> Orders { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -109,6 +115,21 @@ namespace MegaPOS.DBContext
                .HasForeignKey(_=>_.CustomerId)
                .OnDelete(DeleteBehavior.Cascade);
 
+        }
+
+        public override int SaveChanges()
+        {
+            return base.SaveChanges();
+        }
+
+        public override EntityEntry Add(object entity)
+        {
+            return base.Add(entity);
+        }
+
+        public override EntityEntry<TEntity> Add<TEntity>(TEntity entity)
+        {
+            return base.Add(entity);
         }
     }
 }

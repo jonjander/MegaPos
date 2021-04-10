@@ -3,6 +3,7 @@ using Blazorise.Bootstrap;
 using Blazorise.Icons.FontAwesome;
 using MegaPOS.Data;
 using MegaPOS.DBContext;
+using MegaPOS.Model.Interfaces;
 using MegaPOS.Service;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
@@ -42,6 +43,7 @@ namespace MegaPOS
               .AddFontAwesomeIcons();
 
             services.AddDbContext<DatabaseContext>();
+            services.AddScoped<IUnitOfWork, DatabaseContext>(sp => sp.GetRequiredService<DatabaseContext>());
 
             services.AddRazorPages();
             services.AddServerSideBlazor();

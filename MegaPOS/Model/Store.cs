@@ -1,4 +1,6 @@
-﻿using MegaPOS.Enum;
+﻿using MegaPOS.DBContext;
+using MegaPOS.Enum;
+using MegaPOS.Extentions;
 using MegaPOS.Model.Events;
 using System;
 using System.Collections.Generic;
@@ -81,17 +83,20 @@ namespace MegaPOS.Model
         }
 		
 
-		public void Updatediscount()
+		public void Updatediscount(DatabaseContext db)
 		{
-			var marginshare = AssetProfitMarginShare;
-			var outher = AvalibleProducts.ToList();
-			if (marginshare > 0)
-			{
-				foreach (var element in outher)
-				{
-					element.UpdateDiscount(marginshare);
-				}
-			}
+			//db.UpdateProductPrice(Id);
+			
+
+			//var marginshare = AssetProfitMarginShare;
+			//var outher = AvalibleProducts.ToList();
+			//if (marginshare > 0)
+			//{
+			//	foreach (var element in outher)
+			//	{
+			//		element.UpdateDiscount(marginshare);
+			//	}
+			//}
 		}
 
 		

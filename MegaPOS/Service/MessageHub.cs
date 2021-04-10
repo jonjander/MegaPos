@@ -31,7 +31,7 @@ namespace MegaPOS.Service
     {
         public async Task SendProductAdded(ProductAddedEvent productAddedEvent)
         {
-            await Clients.All.SendAsync(SendMethods.ProductAdded.ToString(), productAddedEvent);
+            await Clients.Others.SendAsync(SendMethods.ProductAdded.ToString(), productAddedEvent);
         }
         public async Task SendPriceChanged(PriceChangeEvent priceChangeEvent)
         {
@@ -40,47 +40,47 @@ namespace MegaPOS.Service
 
         public async Task SendQuantityChanged(QuantityEvent notForSaleEvent)
         {
-            await Clients.All.SendAsync(SendMethods.QuantityChanged.ToString(), notForSaleEvent);
+            await Clients.Others.SendAsync(SendMethods.QuantityChanged.ToString(), notForSaleEvent);
         }
 
         public async Task SendGlobalProfitChanged(GlobalProfitChangeEvent globalProfitChangeEvent)
         {
-            await Clients.All.SendAsync(SendMethods.GlobalProfitChanged.ToString(), globalProfitChangeEvent);
+            await Clients.Others.SendAsync(SendMethods.GlobalProfitChanged.ToString(), globalProfitChangeEvent);
         }
 
         public async Task SendFindTerminal(FindTerminalEvent Event)
         {
-            await Clients.All.SendAsync(SendMethods.FindTerminal.ToString(), Event);
+            await Clients.Others.SendAsync(SendMethods.FindTerminal.ToString(), Event);
         }
 
         public async Task SendTeminalFound(TerminalFoundEvent Event)
         {
-            await Clients.All.SendAsync(SendMethods.TerminalFound.ToString(), Event);
+            await Clients.Others.SendAsync(SendMethods.TerminalFound.ToString(), Event);
         }
 
         public async Task SendOpenTerminal(OpenTermnialEvent Event)
         {
-            await Clients.All.SendAsync(SendMethods.OpenTerminal.ToString(), Event);
+            await Clients.Others.SendAsync(SendMethods.OpenTerminal.ToString(), Event);
         }
 
         public async Task SendOpenTerminalConfirmation(OpenTermnialEvent Event)
         {
-            await Clients.All.SendAsync(SendMethods.TerminalOpenConfirmation.ToString(), Event);
+            await Clients.Others.SendAsync(SendMethods.TerminalOpenConfirmation.ToString(), Event);
         }
 
         public async Task SendCloseTerminal(CloseTerminalEvent Event)
         {
-            await Clients.All.SendAsync(SendMethods.CloseTerminal.ToString(), Event);
+            await Clients.Others.SendAsync(SendMethods.CloseTerminal.ToString(), Event);
         }
 
         public async Task SendTerminalSummary(TerminalSummaryEvent Event)
         {
-            await Clients.All.SendAsync(SendMethods.TerminalSummary.ToString(), Event);
+            await Clients.Others.SendAsync(SendMethods.TerminalSummary.ToString(), Event);
         }
 
         public async Task SendProductNameChanged(ProductNameChanged Event)
         {
-            await Clients.All.SendAsync(SendMethods.ProductNameChange.ToString(), Event);
+            await Clients.Others.SendAsync(SendMethods.ProductNameChange.ToString(), Event);
         }
 
         public static HubConnection SetupMessageHub(NavigationManager NavigationManager)

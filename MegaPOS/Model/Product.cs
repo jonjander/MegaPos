@@ -20,9 +20,9 @@ namespace MegaPOS.Model
 		public float Discount { get; set; } = 0;
 		public float MinPriceProcentage { get; set; } = 0.9f;
 
-		//public float Price => GetPrice();
+		public float Price => GetPrice();
 
-		public float Price { get; set; }
+		public float _Price { get; set; }
 
 		private float Weight => ProductsSold / (float)Store.TotalProductsSold;
 		private float ClampedWeight => Weight.Map(0, 0.5f, 1, -1);
@@ -81,17 +81,21 @@ namespace MegaPOS.Model
 		{
 			try
 			{
-				var VolumePrice = 1f;
-				if (Quantity < 2)
-					VolumePrice = LocalProfit * 1.2f;
-				var profit = (LocalProfit + GlobalProfit) / 2f;
-				var newPrice = OriginalPrice * profit * VolumePrice - Discount;
+				return Store.UpdateProductPrice(Id);
+				//Store.UpdateProductPrice();
+				//return _Price;
 
-				var minPrice = OriginalPrice * MinPriceProcentage;
-				if (newPrice < minPrice)
-					return MathF.Round(minPrice, 2);
-				else
-					return MathF.Round(newPrice, 2);
+				//var VolumePrice = 1f;
+				//if (Quantity < 2)
+				//	VolumePrice = LocalProfit * 1.2f;
+				//var profit = (LocalProfit + GlobalProfit) / 2f;
+				//var newPrice = OriginalPrice * profit * VolumePrice - Discount;
+
+				//var minPrice = OriginalPrice * MinPriceProcentage;
+				//if (newPrice < minPrice)
+				//	return MathF.Round(minPrice, 2);
+				//else
+				//	return MathF.Round(newPrice, 2);
 			} catch
             {
 				return 999;

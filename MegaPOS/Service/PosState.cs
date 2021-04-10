@@ -17,6 +17,7 @@ using MegaPOS.Model.Events;
 using MegaPOS.Enum;
 using System.Threading;
 using Microsoft.Extensions.Logging;
+using MegaPOS.Model.Interfaces;
 
 namespace MegaPOS.Service
 {
@@ -24,93 +25,100 @@ namespace MegaPOS.Service
     
     public class PosState
     {
-        private readonly DatabaseContext DatabaseContext;
+        private readonly IUnitOfWork DatabaseContext;
         private readonly ILogger<PosState> logger;
 
         public List<Func<IUpdateRow, Task>> UpdateRow { get; set; } = new List<Func<IUpdateRow, Task>>();
         private Store Store { get; set; }
         public string StoreId => Store?.Id;
-
+        public bool IsInitilized { get; set; }
 
         internal async Task<CustomerVm> GetNewCustomer()
         {
-            var emptyslot = await DatabaseContext.Customers
+            var emptyslot = DatabaseContext.Customers
                 .Include(_ => _.Orders)
-                .FirstOrDefaultAsync(_ => _.Orders.Count == 0 && string.IsNullOrEmpty(_.Name) && _.StoreId == StoreId);
+                .FirstOrDefault(_ => _.Orders.Count == 0 && string.IsNullOrEmpty(_.Name) && _.StoreId == StoreId);
             if (emptyslot != null)
             {
                 return emptyslot.ToVm();
             }
             else
             {
-                var newCustomer = await DatabaseContext.Customers.AddAsync(new Customer() { 
+                var newCustomer = DatabaseContext.Customers.Add(new Customer() { 
                     StoreId = StoreId
                 });
-                await DatabaseContext.SaveChangesAsync();
+                DatabaseContext.SaveChanges();
                 return newCustomer.Entity.ToVm();
             }
         }
 
+        private DbDebouncer<float> ChangeGlobalProfitDebouncer = new DbDebouncer<float>();
+        
         internal async Task<float> ChangeGlobalProfit(float value, HubConnection hubConnection)
         {
-            //Get current state
-            var storeProducts = await DatabaseContext.Set<Product>()
-                .Where(_ => _.StoreId == StoreId)
-                .ToListAsync();
-            var changeEvent = storeProducts.Select(_ =>
-                new PriceChangeEvent
+            return await ChangeGlobalProfitDebouncer.PoolAndRun(async () => {
+                //Get current state
+                var storeProducts = DatabaseContext.Products
+                    .Where(_ => _.StoreId == StoreId)
+                    .ToList();
+                var changeEvent = storeProducts.Select(_ =>
+                    new PriceChangeEvent
+                    {
+                        ProductId = _.Id,
+                        OldPrice = _.Price,
+                        NewQuantity = _.Quantity
+                    }).ToList();
+
+                //change profit
+                var store = DatabaseContext.Stores.FirstOrDefault(_ => _.Id == Store.Id);
+                store.SetProfit(value);
+                DatabaseContext.SaveChanges();
+
+                //Update prices
+                //Store.Updatediscount(DatabaseContext);
+                DatabaseContext.SaveChanges();
+
+                //Report
+                foreach (var item in storeProducts)
                 {
-                    ProductId = _.Id,
-                    OldPrice = _.Price,
-                    NewQuantity = _.Quantity
-                }).ToList();
+                    var change = changeEvent.FirstOrDefault(_ => _.ProductId == item.Id);
+                    change.NewPrice = item.Price;
+                    change.NewQuantity = item.Quantity;
+                }
 
-            //change profit
-            var store = await DatabaseContext.Set<Store>().FirstOrDefaultAsync(_ => _.Id == Store.Id);
-            store.SetProfit(value);
-            await DatabaseContext.SaveChangesAsync();
+                foreach (var item in changeEvent)
+                {
+                    item.StoreId = StoreId;
+                    await hubConnection.SendAsync(nameof(MessageHub.SendPriceChanged), item);
+                }
 
-            //Update prices
-            //Store.Updatediscount();
-            //await DatabaseContext.SaveChangesAsync();
-            DatabaseContext.UpdateProductPrice(StoreId);
+                await hubConnection.SendAsync(nameof(MessageHub.SendGlobalProfitChanged), new GlobalProfitChangeEvent
+                {
+                    StoreId = StoreId,
+                    value = (int)(store.ProfitTarget * 100)
+                });
 
-            //Report
-            foreach (var item in storeProducts)
-            {
-                var change = changeEvent.FirstOrDefault(_ => _.ProductId == item.Id);
-                change.NewPrice = item.Price;
-                change.NewQuantity = item.Quantity;
-            }
-
-            foreach (var item in changeEvent)
-            {
-                item.StoreId = StoreId;
-                await hubConnection.SendAsync(nameof(MessageHub.SendPriceChanged), item);
-            }
-
-            return store.ProfitTarget;
+                return store.ProfitTarget;
+            });
         }
 
         internal async Task<CustomerVm> LoadCustmer(string customerId)
         {
-            var customer = await DatabaseContext.Set<Customer>()
-                .FirstOrDefaultAsync(_ => _.Id == customerId);
+            var customer = DatabaseContext.Customers
+                .FirstOrDefault(_ => _.Id == customerId);
             return customer.ToVm();
         }
 
-        private bool savingCustomerName { get; set; }
-        private QueueWrapper<List<Func<Task<string>>>> NameWriteTasks { get; set; } = new QueueWrapper<List<Func<Task<string>>>> { Object = new List<Func<Task<string>>>() };
-
+      
         private async Task<string> SaveName(string id, string value)
         {
             try
             {
-                var customer = await DatabaseContext
-                    .Set<Customer>()
-                    .FirstOrDefaultAsync(_ => _.Id == id);
+                var customer = DatabaseContext
+                    .Customers
+                    .FirstOrDefault(_ => _.Id == id);
                 customer.Name = value;
-                await DatabaseContext.SaveChangesAsync();
+                DatabaseContext.SaveChanges();
                 logger.LogInformation($"Wrote {value}");
                 return customer.Name;
             } catch (Exception ex)
@@ -131,9 +139,9 @@ namespace MegaPOS.Service
 
         internal async Task ChangeProductName(string productId, string name, HubConnection hubConnection)
         {
-            var product = await DatabaseContext.Set<Product>().FirstOrDefaultAsync(_ => _.Id == productId);
+            var product = DatabaseContext.Products.FirstOrDefault(_ => _.Id == productId);
             product.Name = name;
-            await DatabaseContext.SaveChangesAsync();
+            DatabaseContext.SaveChanges();
 
             await hubConnection.SendAsync(nameof(MessageHub.SendProductNameChanged), new ProductNameChanged { 
                 StoreId = StoreId,
@@ -144,9 +152,9 @@ namespace MegaPOS.Service
 
         internal async Task ChangeProductMinPriceProcentage(string productId, float minPriceProcentage, HubConnection hubConnection)
         {
-            var storeProducts = await DatabaseContext.Set<Product>()
+            var storeProducts = DatabaseContext.Products
                 .Where(_ => _.StoreId == StoreId)
-                .ToListAsync();
+                .ToList();
             var changeEvent = storeProducts.Select(_ =>
                 new PriceChangeEvent
                 {
@@ -155,12 +163,12 @@ namespace MegaPOS.Service
                     NewQuantity = _.Quantity
                 }).ToList();
 
-            var product = await DatabaseContext.Set<Product>().FirstOrDefaultAsync(_ => _.Id == productId);
+            var product = DatabaseContext.Products.FirstOrDefault(_ => _.Id == productId);
             product.UpdateMinPrice(minPriceProcentage);
-            await DatabaseContext.SaveChangesAsync();
-            //Store.Updatediscount();
-            //await DatabaseContext.SaveChangesAsync();
-            DatabaseContext.UpdateProductPrice(StoreId);
+            DatabaseContext.SaveChanges();
+            //Store.Updatediscount(DatabaseContext);
+            DatabaseContext.SaveChanges();
+            //DatabaseContext.UpdateProductPrice(StoreId);
 
             foreach (var item in storeProducts)
             {
@@ -180,26 +188,26 @@ namespace MegaPOS.Service
         {
             //todo send change event for price and quantity
 
-            var product = await DatabaseContext.Set<Product>().FirstOrDefaultAsync(_ => _.Id == productId);
+            var product = DatabaseContext.Products.FirstOrDefault(_ => _.Id == productId);
             product.Quantity += diff;
             if (diff <= 0)
             {
                 var nToRemove = Math.Abs(diff);
                 for (int i = 0; i < nToRemove; i++)
                 {
-                    var revertAsset = await DatabaseContext.Set<Order>()
-                        .FirstOrDefaultAsync(_ => 
+                    var revertAsset = DatabaseContext.Orders
+                        .FirstOrDefault(_ => 
                         _.ProductId == productId &&
                         _.Type == OrderType.Assets
                         );
-                    DatabaseContext.Set<Order>().Remove(revertAsset);
+                    DatabaseContext.Orders.Remove(revertAsset);
 
-                    var revertExpences = await DatabaseContext.Set<Order>()
-                        .FirstOrDefaultAsync(_ =>
+                    var revertExpences = DatabaseContext.Orders
+                        .FirstOrDefault(_ =>
                         _.ProductId == productId &&
                         _.Type == OrderType.Expences
                         );
-                    DatabaseContext.Set<Order>().Remove(revertExpences);
+                    DatabaseContext.Orders.Remove(revertExpences);
                 }
             }
             else
@@ -209,14 +217,14 @@ namespace MegaPOS.Service
                     Store.AddProduct(product);
                 }
             }
-            await DatabaseContext.SaveChangesAsync();
+            DatabaseContext.SaveChanges();
         }
 
         internal async Task RemoveProduct(string orderId, string customerId, HubConnection hubConnection)
         {
-            var storeProducts = await DatabaseContext.Set<Product>()
+            var storeProducts = DatabaseContext.Products
                 .Where(_ => _.StoreId == StoreId)
-                .ToListAsync();
+                .ToList();
             var changeEvent = storeProducts.Select(_ =>
                 new PriceChangeEvent
                 {
@@ -225,8 +233,7 @@ namespace MegaPOS.Service
                     NewQuantity = _.Quantity
                 }).ToList();
 
-            var customer = await DatabaseContext.Set<Customer>()
-                .FirstOrDefaultAsync(_ => _.Id == customerId && _.Closed != true);
+            var customer = DatabaseContext.Customers.FirstOrDefault(_ => _.Id == customerId && _.Closed != true);
 
             if (customer == null)
                 return;
@@ -235,14 +242,12 @@ namespace MegaPOS.Service
                 .Where(_ => _.Id != orderId)
                 .ToList();
 
-            var order = await DatabaseContext.Set<Order>()
-                .FirstOrDefaultAsync(_ => _.Id == orderId);
+            var order = DatabaseContext.Orders.FirstOrDefault(_ => _.Id == orderId);
 
             order.Product.Increase();
-            await DatabaseContext.SaveChangesAsync();
-            //Store.Updatediscount();
-            //await DatabaseContext.SaveChangesAsync();
-            DatabaseContext.UpdateProductPrice(StoreId);
+            DatabaseContext.SaveChanges();
+            //Store.Updatediscount(DatabaseContext);
+            DatabaseContext.SaveChanges();
 
 
             foreach (var item in storeProducts)
@@ -262,15 +267,15 @@ namespace MegaPOS.Service
 
         internal async Task ChangeProductLocalProfit(string productId, float localProfit)
         {
-            var product = await DatabaseContext.Set<Product>().FirstOrDefaultAsync(_ => _.Id == productId);
+            var product = DatabaseContext.Products.FirstOrDefault(_ => _.Id == productId);
             product.SetProfit(localProfit);
-            await DatabaseContext.SaveChangesAsync();
+            DatabaseContext.SaveChanges();
         }
 
         internal async Task<float> GetGlobalProfit()
         {
-            var store = await DatabaseContext.Set<Store>().FirstOrDefaultAsync(_ => _.Id == Store.Id);
-            return store.ProfitTarget;
+            var store = DatabaseContext.Stores.FirstOrDefault(_ => _.Id == StoreId);
+            return store?.ProfitTarget ?? 1.1f;
         }
 
         public PosState(
@@ -283,6 +288,8 @@ namespace MegaPOS.Service
 
         public async Task Init(string name)
         {
+            if (IsInitilized)
+                return;
             if (string.IsNullOrEmpty(name))
                 throw new Exception("name error");
             var existing = DatabaseContext.Stores
@@ -293,26 +300,27 @@ namespace MegaPOS.Service
                 .FirstOrDefault(_=>_.Name == name);
             if (existing == null)
             {
-                existing = new Store(1.0f, name);
+                existing = new Store(1.1f, name);
                 DatabaseContext.Add(existing);
-                await DatabaseContext.SaveChangesAsync();
+                DatabaseContext.SaveChanges();
             }
             Store = existing;
+            IsInitilized = true;
         }
 
         internal async Task Checkout(string id)
         {
-            var customer = await DatabaseContext.Customers.FirstOrDefaultAsync(_ => _.Id == id);
+            var customer = DatabaseContext.Customers.FirstOrDefault(_ => _.Id == id);
             customer.Closed = true;
-            await DatabaseContext.SaveChangesAsync();
+            DatabaseContext.SaveChanges();
             //todo new Receipt(cust)
         }
 
         public async Task<List<PriceChangeEvent>> SellProduct(Customer c, Product p)
         {
-            var storeProducts = await DatabaseContext.Set<Product>()
+            var storeProducts = DatabaseContext.Products
                 .Where(_ => _.StoreId == StoreId)
-                .ToListAsync();
+                .ToList();
             var changeEvent = storeProducts.Select(_ =>
                 new PriceChangeEvent
                 {
@@ -336,9 +344,9 @@ namespace MegaPOS.Service
             c.LäggTillOrer(order);
 
             Store.Orders.Add(order);
-            //Store.Updatediscount();
+            //Store.Updatediscount(DatabaseContext);
 
-            DatabaseContext.UpdateProductPrice(StoreId);
+            //DatabaseContext.UpdateProductPrice(StoreId);
 
             foreach (var item in storeProducts)
             {
@@ -352,10 +360,10 @@ namespace MegaPOS.Service
 
         internal async Task BuyProduct(string costumerId, string productId, HubConnection hubConnection)
         {
-            var product = await DatabaseContext.Set<Product>().FirstOrDefaultAsync(_ => _.Id == productId);
-            var customer = await DatabaseContext.Set<Customer>().FirstOrDefaultAsync(_ => _.Id == costumerId);
+            var product = DatabaseContext.Products.FirstOrDefault(_ => _.Id == productId);
+            var customer = DatabaseContext.Customers.FirstOrDefault(_ => _.Id == costumerId);
             var priceChangeEvents = await SellProduct(customer, product);
-            await DatabaseContext.SaveChangesAsync();
+            DatabaseContext.SaveChanges();
 
             foreach (var item in priceChangeEvents)
             {
@@ -377,10 +385,10 @@ namespace MegaPOS.Service
 
         internal async Task<List<OrderVm>> GetCustomerOrders(string custumerId)
         {
-            var orders = await DatabaseContext
-                .Set<Order>()
+            var orders = DatabaseContext
+                .Orders
                 .Where(_ => _.CustomerId == custumerId)
-                .ToListAsync();
+                .ToList();
             return orders.ToVm();
         }
 
@@ -394,10 +402,11 @@ namespace MegaPOS.Service
                 Name = product.Name,
                 StoreId = StoreId
             };
-            var item = await DatabaseContext.AddAsync(p);
+      
+            var item = DatabaseContext.Add(p);
             Store.AddProduct(p);
 
-            await DatabaseContext.SaveChangesAsync();
+            DatabaseContext.SaveChanges();
             var addedEvent = new ProductAddedEvent(item.Entity.ToVm());
             addedEvent.StoreId = StoreId;
             await hubConnection.SendAsync(nameof(MessageHub.SendProductAdded), addedEvent);
@@ -405,10 +414,10 @@ namespace MegaPOS.Service
 
         internal async Task<List<ProductVm>> GetAllProducts(string storeId)
         {
-            DatabaseContext.UpdateProductPrice(StoreId);
-            var result = await DatabaseContext.Set<Product>()
+            //DatabaseContext.UpdateProductPrice(StoreId);
+            var result = DatabaseContext.Products
                          .Where(_ => _.StoreId == storeId)
-                         .ToListAsync();
+                         .ToList();
             return result.ToVm();
         }
 
@@ -461,10 +470,10 @@ namespace MegaPOS.Service
             if (isLoadingCustomers)
                 return new List<CustomerVm>();
             isLoadingCustomers = true;
-            var customers = await DatabaseContext.Set<Customer>()
+            var customers = DatabaseContext.Customers
                 .Include(_=>_.Orders)
                 .Where(_ => _.Closed != true && _.StoreId == StoreId)
-                .ToListAsync();
+                .ToList();
             isLoadingCustomers = false;
             return customers.ToVm();
         }
