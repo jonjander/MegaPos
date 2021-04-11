@@ -16,13 +16,13 @@
                     OnProductChanged="ChangeProduct" />
 
 <Row Class="pos-head">
-    <Column ColumnSize="ColumnSize.Is6">
+    <Column ColumnSize="ColumnSize.Is4" Style="padding-left: 4px; padding-right: 5px;">
         <Button Clicked="addProductModal.ShowModal"
                 Color="Color.Primary">
-            Add product
+            + product
         </Button>
     </Column>
-    <Column ColumnSize="ColumnSize.Is4">
+    <Column ColumnSize="ColumnSize.Is5" Style="padding-left: 4px; padding-right: 5px;">
         <Field>
             @if (Customer != null)
             {
@@ -30,15 +30,15 @@
             }
         </Field>
     </Column>
-    <Column ColumnSize="ColumnSize.Is2">
+    <Column ColumnSize="ColumnSize.Is3" Style="padding-left: 4px; padding-right: 5px;">
         <Button Clicked="customersModal.ShowModal"
                 Color="Color.Primary">
-            Change customer
+            Customers
         </Button>
     </Column>
 </Row>
 <Row Class="pos-body">
-    <Column ColumnSize="ColumnSize.Is9">
+    <Column ColumnSize="ColumnSize.Is8">
         <div class="product-container">
             @if (Model?.AvalibleProducts != null && Model.AvalibleProducts.Any())
             {
@@ -51,31 +51,33 @@
             }
         </div>
     </Column>
-    <Column ColumnSize="ColumnSize.Is3">
+    <Column ColumnSize="ColumnSize.Is4" Style="padding-left: 4px; padding-right: 5px;">
         <div class="cart-container">
             <div class="cart-rows-container">
                 @if (Customer != null && Customer.Orders.Any())
                 {
                     @foreach (var item in Customer?.Orders)
                     {
-                        <Row Class="cart-row">
-                            <Column ColumnSize="ColumnSize.Is9">
-                                @item.ProductName @item.Price.ToString("0.00")
-                            </Column>
-                            <Column ColumnSize="ColumnSize.Is3">
+                        <div Class="cart-row">
+                            <div class="cart-row-name">
+                                <span class="cart-row-name-product">@item.ProductName</span> <b>@(item.Price.ToString("0.00"))kr</b>
+                            </div>
+                            <div class="cart-row-actions">
                                 <Button Class="cart-delete" Color="Color.Danger" Clicked="@(async () => await RemoveProduct(item.Id, Customer.Id))"><Icon Name="IconName.Delete" /></Button>
-                            </Column>
-                        </Row>
+                            </div>
+                        </div>
                     }
                 }
             </div>
             <div class="cart-checkout">
                 <div>Total: @(Customer?.Orders?.Sum(_=>_.Price).ToString("0.00") ?? "0.00")kr</div>
                 <Button Clicked="Checkout"
+                        Class="cart-buttons"
                         Color="Color.Warning">
                     Checkout
                 </Button>
                 <Button Clicked="ParkCustomer"
+                        Class="cart-buttons"
                         Color="Color.Warning">
                     Park
                 </Button>

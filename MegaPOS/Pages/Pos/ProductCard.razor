@@ -2,11 +2,11 @@
     <div @onclick="BuyProduct" style="width:100%">
         @if (Model.IsDisabled || Model.Quantity <= 0)
         {
-            <h4><del>@Model.Name</del></h4>
+            <h4 class="product-card-name"><del>@Model.Name</del></h4>
         }
         else
         {
-            <h4>@Model.Name</h4>
+            <h4 class="product-card-name">@Model.Name</h4>
         }
         <h5>@Model.Price.ToString("0.00") kr</h5>
         <p>Quantity : @Model.Quantity</p>
