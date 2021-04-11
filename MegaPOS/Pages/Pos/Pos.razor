@@ -72,6 +72,7 @@
             <div class="cart-checkout">
                 <div>Total: @(Customer?.Orders?.Sum(_=>_.Price).ToString("0.00") ?? "0.00")kr</div>
                 <Button Clicked="Checkout"
+                        Disabled="@(!(Customer?.Orders?.Any() ?? false))"
                         Class="cart-buttons"
                         Color="Color.Warning">
                     Checkout

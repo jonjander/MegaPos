@@ -199,3 +199,14 @@ a, .btn-link {
 .interact-btn {
     cursor: pointer;
 }
+
+.terminal-card {
+    border: 2px lightslategray solid;
+    border-radius: 8px;
+    padding-left: 8px;
+    background: lightslategray;
+    font-size: x-large;
+    font-weight: 700;
+    margin-bottom: 4px;
+    box-shadow: 3px 2px #19171763;
+}
