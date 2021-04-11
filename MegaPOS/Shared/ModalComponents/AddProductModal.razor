@@ -18,12 +18,14 @@
                              Attributes="@(new Dictionary<string, object> { { "inputmode", "decimal" } })"
                              Decimals="2"
                              Min="1"
+                             Max="50000"
                              Placeholder="Price" />
             </Field>
             <Field>
                 <FieldLabel>Quantity</FieldLabel>
                 <NumericEdit @bind-Value="@model.Quantity"
                              Min="1"
+                             Max="10000"
                              Placeholder="Quantity" />
             </Field>
             <Field>
@@ -31,7 +33,8 @@
                 <NumericEdit @bind-Value="@model.LocalProfit"
                              Attributes="@(new Dictionary<string, object> { { "inputmode", "decimal" } })"
                              Decimals="2"
-                             Min="0"
+                             Min="0.1f"
+                             Max="10"
                              Placeholder="Local profit" />
             </Field>
         </ModalBody>
