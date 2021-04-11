@@ -15,6 +15,8 @@
                 <Field>
                     <FieldLabel>Min price percentage</FieldLabel>
                     <NumericEdit @bind-Value="@model.MinPriceProcentage"
+                                 Attributes="@(new Dictionary<string, object> { { "inputmode", "decimal" } })"
+                                 Decimals="2"
                                  Min="0.1f"
                                  Max="10f"
                                  Placeholder="Price" />
@@ -27,6 +29,8 @@
                 <Field>
                     <FieldLabel>Local profit</FieldLabel>
                     <NumericEdit @bind-Value="@model.LocalProfit"
+                                 Attributes="@(new Dictionary<string, object> { { "inputmode", "decimal" } })"
+                                 Decimals="2"
                                  Min="0.1f"
                                  Max="10f"
                                  Placeholder="Local profit" />

@@ -15,16 +15,23 @@
             <Field>
                 <FieldLabel>Price</FieldLabel>
                 <NumericEdit @bind-Value="@model.Price"
+                             Attributes="@(new Dictionary<string, object> { { "inputmode", "decimal" } })"
+                             Decimals="2"
+                             Min="1"
                              Placeholder="Price" />
             </Field>
             <Field>
                 <FieldLabel>Quantity</FieldLabel>
                 <NumericEdit @bind-Value="@model.Quantity"
+                             Min="1"
                              Placeholder="Quantity" />
             </Field>
             <Field>
                 <FieldLabel>Local profit</FieldLabel>
                 <NumericEdit @bind-Value="@model.LocalProfit"
+                             Attributes="@(new Dictionary<string, object> { { "inputmode", "decimal" } })"
+                             Decimals="2"
+                             Min="0"
                              Placeholder="Local profit" />
             </Field>
         </ModalBody>
