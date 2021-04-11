@@ -76,7 +76,7 @@ namespace MegaPOS.Shared.ModalComponents.CheckoutModalComponent
                         //open terminal
                         stage = CheckoutStages.TerminalSelected;
                         TerminalId = Event.TerminalId;
-                        var orders = await posState.GetCustomerOrders(SelectedCustomerId);
+                        var orders = posState.GetCustomerOrders(SelectedCustomerId);
 
                         await hubConnection.SendAsync(nameof(MessageHub.SendTerminalSummary), new TerminalSummaryEvent { 
                             StoreId = posState.StoreId,

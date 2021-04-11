@@ -26,7 +26,7 @@ namespace MegaPOS.Pages
                 //var service = posState; 
                 var service = posState; // serviceScope.ServiceProvider.GetService<PosState>();
                 if (!service.IsInitilized)
-                    await service.Init(Id);
+                    service.Init(Id);
 
                 var result = await serviceMethodCall(service);
                 if (efterbehandling != null)
@@ -45,7 +45,7 @@ namespace MegaPOS.Pages
                 //using var serviceScope = ScopeFactory.CreateScope();
                 var service = posState;  //serviceScope.ServiceProvider.GetService<PosState>();
                 if (!service.IsInitilized)
-                    await service.Init(Id);
+                    service.Init(Id);
                 await serviceMethod(service);
             }
             catch (Exception ex)

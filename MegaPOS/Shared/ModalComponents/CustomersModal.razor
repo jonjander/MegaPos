@@ -46,9 +46,9 @@
     }
 
 
-    public async Task ShowModal()
+    public void ShowModal()
     {
-        model = await posState.LoadOpenCustomers();
+        model = posState.LoadOpenCustomers();
         modalRef.Show();
     }
 

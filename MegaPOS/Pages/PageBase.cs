@@ -39,7 +39,7 @@ namespace MegaPOS.Pages
 
         protected override async Task OnInitializedAsync()
         {
-            await Exekvera(_ => _.Init(Id));
+            ExekveraSync(_ => _.Init(Id));
             hubConnection = MessageHub.SetupMessageHub(NavigationManager);
             SetupMessageHub();
             await hubConnection.StartAsync();
@@ -49,7 +49,7 @@ namespace MegaPOS.Pages
         private async Task LoadViewModel()
         {
             Model = new StoreViewModel();
-            Model.Products = await Exekvera(posState => posState.GetAllProducts(posState.StoreId));
+            Model.Products = ExekveraSync(posState => posState.GetAllProducts(posState.StoreId));
             Model.LeaderboardRows = Model.AvalibleProducts.ToLeaderboardModel();
         }
 

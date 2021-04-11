@@ -55,7 +55,7 @@ namespace MegaPOS.Pages.Pos
         {
             await base.OnInitializedAsync();
             await NewCustomer();
-            var current = await Exekvera(posState => posState.GetGlobalProfit());
+            var current = ExekveraSync(posState => posState.GetGlobalProfit());
             GlobalProfit = (int)(current * 100);
         }
 
@@ -72,7 +72,7 @@ namespace MegaPOS.Pages.Pos
 
         protected async Task ChangeCustomer(string customerId)
         {
-            Customer = await Exekvera(posState => posState.LoadCustmer(customerId));
+            Customer = ExekveraSync(posState => posState.LoadCustmer(customerId));
         }
 
         protected async Task ChangeCustomerName(string value)
@@ -84,7 +84,7 @@ namespace MegaPOS.Pages.Pos
         protected async Task BuyProduct(ProductVm product)
         {
             await Exekvera(posState => posState.BuyProduct(Customer.Id, product.ProductId, hubConnection));
-            Customer.Orders = await Exekvera(posState => posState.GetCustomerOrders(Customer.Id));
+            Customer.Orders = ExekveraSync(posState => posState.GetCustomerOrders(Customer.Id));
         }
 
         protected async Task Checkout()
@@ -95,14 +95,14 @@ namespace MegaPOS.Pages.Pos
 
         protected async Task CustomerPayed(string customerId)
         {
-            await Exekvera(posState => posState.Checkout(customerId));
+            ExekveraSync(posState => posState.Checkout(customerId));
             await NewCustomer();
         }
 
         protected async Task ChangeProduct(ChangeProductCommand command)
         {
             if (command.LocalProfit != command.OriginalProduct.LocalProfit)
-                await Exekvera(posState => posState.ChangeProductLocalProfit(command.OriginalProduct.ProductId, command.LocalProfit));
+                ExekveraSync(posState => posState.ChangeProductLocalProfit(command.OriginalProduct.ProductId, command.LocalProfit));
 
             if (command.Name != command.OriginalProduct.Name)
                 await Exekvera(posState => posState.ChangeProductName(command.OriginalProduct.ProductId, command.Name, hubConnection));
@@ -111,7 +111,7 @@ namespace MegaPOS.Pages.Pos
                 await Exekvera(posState => posState.ChangeProductMinPriceProcentage(command.OriginalProduct.ProductId, command.MinPriceProcentage, hubConnection));
 
             if (command.Quantity != command.OriginalProduct.Quantity)
-                await Exekvera(posState => posState.ChangeProductQuantity(command.OriginalProduct.ProductId,  command.Quantity - command.OriginalProduct.Quantity));
+                ExekveraSync(posState => posState.ChangeProductQuantity(command.OriginalProduct.ProductId,  command.Quantity - command.OriginalProduct.Quantity));
         }
 
         protected async Task ParkCustomer()
