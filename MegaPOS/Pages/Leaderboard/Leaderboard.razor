@@ -1,12 +1,17 @@
 ﻿@page "/{id}/board"
 @inherits LeaderboardBase
+
 <div class="board-main">
+    @if (TerminalName != null)
+    {
+        <h1>Terminal @TerminalName</h1>
+    }
     <div class="all-slides">
         @if (Model?.LeaderboardRows != null)
         {
             @foreach (var row in Model.LeaderboardRows)
             {
-                <LeaderboardRow RowModel="row"/>
+                <LeaderboardRow RowModel="row" />
             }
         }
     </div>
@@ -23,6 +28,6 @@
 </style>
 
 @code {
- 
-   
+
+
 }

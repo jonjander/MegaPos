@@ -1,4 +1,5 @@
 ﻿using MegaPOS.Extentions;
+using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,7 @@ namespace MegaPOS.Pages.Leaderboard
 {
     public class LeaderboardBase : PageBase, IDisposable
     {
-
+        [Parameter]public string TerminalName { get; set; }
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();

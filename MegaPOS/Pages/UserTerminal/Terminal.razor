@@ -1,4 +1,5 @@
 ﻿@page "/{id}/terminal/{name}"
+@using MegaPOS.Pages.Leaderboard;
 @inherits TerminalBase
 
 <h1>Terminal @name</h1>
@@ -26,9 +27,6 @@
             </Row>
         </Column>
     </Row>
-    
-}
-
-@code {
-
+} else {
+    <Leaderboard Id="@Id" TerminalName="@name" />
 }
