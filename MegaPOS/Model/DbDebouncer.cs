@@ -30,6 +30,7 @@ namespace MegaPOS.Model
                 if (TaskPool.Object.Count > 1)
                 {
                     TaskPool.DropFist();
+                    continue;
                 }
                 var currentTask = TaskPool.PopFist();
                 Result = await currentTask.Invoke();

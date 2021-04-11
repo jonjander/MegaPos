@@ -74,10 +74,6 @@ namespace MegaPOS.Service
                 store.SetProfit(value);
                 DatabaseContext.SaveChanges();
 
-                //Update prices
-                //Store.Updatediscount(DatabaseContext);
-                DatabaseContext.SaveChanges();
-
                 //Report
                 foreach (var item in storeProducts)
                 {

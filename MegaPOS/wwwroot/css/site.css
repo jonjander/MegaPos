@@ -79,7 +79,7 @@ a, .btn-link {
 .cart-rows-container {
     margin-top: 20px;
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     flex-direction: column;
     max-height: 90%;
     min-height: 80%;
@@ -194,4 +194,8 @@ a, .btn-link {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+}
+
+.interact-btn {
+    cursor: pointer;
 }

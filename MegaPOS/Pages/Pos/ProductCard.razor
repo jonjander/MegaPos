@@ -1,5 +1,5 @@
 ﻿<div class="product-card" >
-    <div @onclick="BuyProduct" style="width:100%">
+    <div @onclick="BuyProduct" style="width:100%" class="interact-btn">
         @if (Model.IsDisabled || Model.Quantity <= 0)
         {
             <h4 class="product-card-name"><del>@Model.Name</del></h4>
