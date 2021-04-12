@@ -1,5 +1,6 @@
 ﻿@if (model != null)
 {
+    
     <Modal @ref="modalRef">
         <ModalContent IsCentered="true">
             <ModalHeader>
@@ -11,6 +12,10 @@
                     <FieldLabel>Name</FieldLabel>
                     <TextEdit Placeholder="Name"
                               @bind-Text="model.Name" />
+                </Field>
+                <Field>
+                    <!--todo upload image-->
+                    <input type="file" accept="image/*" capture>
                 </Field>
                 <Field>
                     <FieldLabel>Min price percentage</FieldLabel>
@@ -70,6 +75,5 @@
 
             modalRef.Hide();
         }
-
     }
 }

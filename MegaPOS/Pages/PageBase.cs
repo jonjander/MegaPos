@@ -43,10 +43,10 @@ namespace MegaPOS.Pages
             hubConnection = MessageHub.SetupMessageHub(NavigationManager);
             SetupMessageHub();
             await hubConnection.StartAsync();
-            await LoadViewModel();
+            LoadViewModel();
         }
 
-        private async Task LoadViewModel()
+        private void LoadViewModel()
         {
             Model = new StoreViewModel();
             Model.Products = ExekveraSync(posState => posState.GetAllProducts(posState.StoreId));
@@ -56,7 +56,7 @@ namespace MegaPOS.Pages
 
         protected virtual void SetupMessageHub()
         {
-            hubConnection.On<QuantityEvent>(SendMethods.QuantityChanged.ToString(), async (Event) =>
+            hubConnection.On<QuantityEvent>(SendMethods.QuantityChanged.ToString(), (Event) =>
             {
                 
                 if (StoreId == Event.StoreId)

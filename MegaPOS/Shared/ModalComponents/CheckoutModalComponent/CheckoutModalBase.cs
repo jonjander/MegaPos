@@ -52,15 +52,15 @@ namespace MegaPOS.Shared.ModalComponents.CheckoutModalComponent
 
             modalRef.Show();
 
-
             StartScanner();
         }
 
+
         private async void StartScanner()
         {
-            while (stage != CheckoutStages.TerminalSelected)
+            var startTime = DateTime.Now;
+            while (stage != CheckoutStages.TerminalSelected && startTime.AddMinutes(10) > DateTime.Now)
             {
-                //todo timeout
                 if (hubConnection.State == HubConnectionState.Connected)
                 {
                     await RequestTerminal();
@@ -98,7 +98,7 @@ namespace MegaPOS.Shared.ModalComponents.CheckoutModalComponent
                 }
             });
 
-            hubConnection.On<TerminalFoundEvent>(SendMethods.TerminalFound.ToString(), async (Event) => {
+            hubConnection.On<TerminalFoundEvent>(SendMethods.TerminalFound.ToString(), (Event) => {
                 if (posState.StoreId == Event.StoreId &&
                     SelectedCustomerId == Event.CustomerId &&
                     (stage == CheckoutStages.TerminalFound || stage == CheckoutStages.TerminalScanning)

@@ -33,7 +33,7 @@ namespace MegaPOS.Pages.Pos
         protected override void SetupMessageHub()
         {
             base.SetupMessageHub();
-            hubConnection.On<GlobalProfitChangeEvent>(SendMethods.GlobalProfitChanged.ToString(), async (Event) =>
+            hubConnection.On<GlobalProfitChangeEvent>(SendMethods.GlobalProfitChanged.ToString(), (Event) =>
             {
                 if (StoreId == Event.StoreId)
                 {
@@ -54,14 +54,14 @@ namespace MegaPOS.Pages.Pos
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
-            await NewCustomer();
+            NewCustomer();
             var current = ExekveraSync(posState => posState.GetGlobalProfit());
             GlobalProfit = (int)(current * 100);
         }
 
-        protected async Task NewCustomer()
+        protected void NewCustomer()
         {
-            Customer = await Exekvera(posState => posState.GetNewCustomer());
+            Customer = ExekveraSync(posState => posState.GetNewCustomer());
         }
 
         protected async Task AddProduct(NewProductCommand product)
@@ -70,7 +70,7 @@ namespace MegaPOS.Pages.Pos
                 
         }
 
-        protected async Task ChangeCustomer(string customerId)
+        protected void ChangeCustomer(string customerId)
         {
             Customer = ExekveraSync(posState => posState.LoadCustmer(customerId));
         }
@@ -93,10 +93,10 @@ namespace MegaPOS.Pages.Pos
                 await checkoutModal.ShowModal(Customer);
         }
 
-        protected async Task CustomerPayed(string customerId)
+        protected void CustomerPayed(string customerId)
         {
             ExekveraSync(posState => posState.Checkout(customerId));
-            await NewCustomer();
+            NewCustomer();
         }
 
         protected async Task ChangeProduct(ChangeProductCommand command)
@@ -114,10 +114,10 @@ namespace MegaPOS.Pages.Pos
                 ExekveraSync(posState => posState.ChangeProductQuantity(command.OriginalProduct.ProductId,  command.Quantity - command.OriginalProduct.Quantity));
         }
 
-        protected async Task ParkCustomer()
+        protected void ParkCustomer()
         {
             if (Customer.Orders != null && Customer.Orders.Any())
-                Customer = await Exekvera(posState => posState.GetNewCustomer());
+                Customer = ExekveraSync(posState => posState.GetNewCustomer());
         }
 
 

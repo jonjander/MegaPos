@@ -128,7 +128,6 @@ namespace MegaPOS.Extentions
             float antalUnikaProdukter = store.Products.Count;
 
             var products = store.Products;
-            //todo do not calc all every time
             var stage1 = products
                 .Select(_ => new
                 {
@@ -246,8 +245,11 @@ namespace MegaPOS.Extentions
             var slectedProduct = stage5.FirstOrDefault(_ => _.Id == productId);
             var calculatedPrice = slectedProduct?.Price ?? 0;
             var minPrice = slectedProduct.OriginalPrice * slectedProduct.MinPriceProcentage;
+            var maxPrice = slectedProduct.OriginalPrice * 10;
             if (calculatedPrice < minPrice)
                 calculatedPrice = minPrice;
+            if (calculatedPrice > maxPrice)
+                return maxPrice;
             return calculatedPrice;
 
         }

@@ -27,13 +27,12 @@ namespace MegaPOS.Service
     {
         private readonly IUnitOfWork DatabaseContext;
         private readonly ILogger<PosState> logger;
-
         public List<Func<IUpdateRow, Task>> UpdateRow { get; set; } = new List<Func<IUpdateRow, Task>>();
         private Store Store { get; set; }
         public string StoreId => Store?.Id;
         public bool IsInitilized { get; set; }
 
-        internal async Task<CustomerVm> GetNewCustomer()
+        internal CustomerVm GetNewCustomer()
         {
             var emptyslot = DatabaseContext.Customers
                 .Include(_ => _.Orders)
