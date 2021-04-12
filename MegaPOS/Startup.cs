@@ -1,7 +1,6 @@
 using Blazorise;
 using Blazorise.Bootstrap;
 using Blazorise.Icons.FontAwesome;
-using MegaPOS.Data;
 using MegaPOS.DBContext;
 using MegaPOS.Model.Interfaces;
 using MegaPOS.Service;
@@ -47,7 +46,6 @@ namespace MegaPOS
 
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSingleton<WeatherForecastService>();
             services.AddScoped<PosState>();
             services.AddApplicationInsightsTelemetry(Configuration["APPINSIGHTS_CONNECTIONSTRING"]);
         }
