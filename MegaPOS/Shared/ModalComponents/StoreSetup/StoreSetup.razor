@@ -18,7 +18,7 @@
                     <FieldLabel>Quantity</FieldLabel>
                     <TextEdit @bind-Value="@model.PayoutSwishNumber"
                               MaskType="MaskType.RegEx"
-                              EditMask="^(0|123)[\d]{0,13}$"
+                              EditMask="^[\d]{0,13}$"
                               Placeholder="Swish number" />
                 </Field>
                 <Field>
