@@ -15,6 +15,7 @@ using MegaPOS.Model.Commands;
 using MegaPOS.Model.vm;
 using MegaPOS.Model.Events;
 using MegaPOS.Shared.ModalComponents.CheckoutModalComponent;
+using MegaPOS.Shared.ModalComponents.StoreSetup;
 
 namespace MegaPOS.Pages.Pos
 {
@@ -25,6 +26,7 @@ namespace MegaPOS.Pages.Pos
         protected CustomersModal customersModal { get; set; }
         protected CheckoutModal checkoutModal { get; set; }
         protected ChangeProductModal changeProductModal { get; set; }
+        protected StoreSetup storeSetup { get; set; }
 
         protected CustomerVm Customer { get; set; }
 
@@ -136,6 +138,11 @@ namespace MegaPOS.Pages.Pos
         {
             ProductVm loadedproduct = ExekveraSync(_ => _.GetProduct(product.ProductId));
             changeProductModal.ShowModal(loadedproduct);
+        }
+
+        protected void OpenSetupModal()
+        {
+            storeSetup.OpenModal();
         }
     }
 }

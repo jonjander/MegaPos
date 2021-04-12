@@ -18,7 +18,6 @@ namespace MegaPOS.Pages.UserTerminal
 {
     public class TerminalBase : PageBase
     {
-        [Inject] public IConfiguration config { get; set; }
         [Parameter] public string name { get; set; }
         private bool IsInUse { get; set; }
         protected bool DisplaySummary { get; set; }
@@ -34,7 +33,9 @@ namespace MegaPOS.Pages.UserTerminal
         public void GenereateQRCode(string customer)
         {
             var message = $"{name} {customer}".Truncate(50);
-            var text = $"C{config.GetValue<string>("swish")};{Orders.Sum(_=>_.Price).ToString("0.00").Replace(",",".")};{message};0";
+            var storeSetup = ExekveraSync(_ => _.GetStoreSetup(StoreId));
+
+            var text = $"C{storeSetup.PayoutSwishNumber};{Orders.Sum(_=>_.Price).ToString("0.00").Replace(",",".")};{message};0";
             if (!string.IsNullOrEmpty(text))
             {
                 using var ms = new MemoryStream();

@@ -57,6 +57,7 @@ namespace MegaPOS.Model
 				.ToList() ?? new List<Product>();
 
         public string Name { get; set; }
+        public string PayoutSwishNumber { get; set; }
 
         public void SetProfit(float profit)
 		{

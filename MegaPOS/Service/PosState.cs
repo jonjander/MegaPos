@@ -492,7 +492,28 @@ namespace MegaPOS.Service
 
         public ProductVm GetProduct (string id)
             => DatabaseContext.Products.FirstOrDefault(_ => _.Id == id).ToVm();
-        
 
+        internal StoreSetupVm GetStoreSetup(string storeId)
+        {
+            var store = DatabaseContext.Stores
+                .AsSplitQuery()
+                .Include(_ => _.Orders)
+                .ThenInclude(_ => _.Product)
+                .FirstOrDefault(_ => _.Id == storeId);
+            var result = new StoreSetupVm
+            {
+                StoreId = storeId,
+                PayoutSwishNumber = store.PayoutSwishNumber,
+                Name = store.Name
+            };
+            result.StoreStats = new StoreStats
+            {
+                TotalAssetWorth = store.Orders.Where(_ => _.Type == OrderType.Assets).Sum(_ => _.Debit),
+                TotalSold = store.Orders.Where(_=>_.Type == OrderType.Revenues).Sum(_=>_.Credit),
+                TotalMargin = store.Orders.Where(_ => _.Type == OrderType.Revenues).Sum(_ => _.Credit) - store.Orders.Where(_ => _.Type == OrderType.Revenues).Sum(_=>_.Product.OriginalPrice) 
+            };
+
+            return result;
+        }
     }
 }

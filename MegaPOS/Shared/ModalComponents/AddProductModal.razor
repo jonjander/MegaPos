@@ -39,8 +39,8 @@
             </Field>
         </ModalBody>
         <ModalFooter>
-            <Button Color="Color.Secondary" Clicked="@HideModal">Close</Button>
-            <Button Color="Color.Primary" Clicked="@HideModal">Add product</Button>
+            <Button Color="Color.Secondary" Clicked="@Close">Close</Button>
+            <Button Color="Color.Primary" Clicked="@AddProduct">Add product</Button>
         </ModalFooter>
     </ModalContent>
 </Modal>
@@ -64,11 +64,16 @@
         modalRef.Show();
     }
 
-    public async Task HideModal()
+    public void Close()
+    {
+        modalRef.Hide();
+    }
+
+    public async Task AddProduct()
     {
         if (model.IsValid()) {
             await OnAddProduct.InvokeAsync(model);
-            
+
             modalRef.Hide();
         }
 

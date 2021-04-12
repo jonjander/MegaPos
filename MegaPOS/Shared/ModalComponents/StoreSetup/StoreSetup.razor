@@ -1,0 +1,49 @@
+﻿@inherits StoreSetupBase
+@if (model != null)
+{
+    <Modal @ref="modalRef">
+        <ModalContent IsCentered="true">
+            <ModalHeader>
+                <ModalTitle>Add new product</ModalTitle>
+                <CloseButton />
+            </ModalHeader>
+            <ModalBody>
+                <Field>
+                    <FieldLabel>Name</FieldLabel>
+                    <TextEdit Placeholder="Name"
+                              Disabled="true"
+                              @bind-Text="model.Name" />
+                </Field>
+                <Field>
+                    <FieldLabel>Quantity</FieldLabel>
+                    <TextEdit @bind-Value="@model.PayoutSwishNumber"
+                              MaskType="MaskType.RegEx"
+                              EditMask="^(0|123)[\d]{0,13}$"
+                              Placeholder="Swish number" />
+                </Field>
+                <Field>
+                    <FieldLabel>Erase unused customers</FieldLabel>
+                    <Button Color="Color.Danger" Clicked="EraseUnusedCustomers">Erase customers</Button>
+                </Field>
+                <Field>
+                    <p>Total assets @(model.StoreStats.TotalAssetWorth.ToString("0.00"))kr</p><br />
+                    <p>Total margin @(model.StoreStats.TotalMargin.ToString("0.00"))kr</p><br />
+                    <p>Total sold @(model.StoreStats.TotalSold.ToString("0.00"))kr</p>
+                </Field>
+
+            </ModalBody>
+            <ModalFooter>
+                <Button Color="Color.Secondary" Clicked="@Close">Close</Button>
+                <Button Color="Color.Primary" Clicked="@Save">Save</Button>
+            </ModalFooter>
+        </ModalContent>
+    </Modal>
+}
+@code {
+    //todo global profit
+    //todo Store stats
+    //todo cleanup empty customers
+    //todo change swishnumber
+    //todo send warning
+
+}
