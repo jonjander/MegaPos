@@ -29,7 +29,28 @@ namespace MegaPOS.Service
         private readonly IUnitOfWork DatabaseContext;
         private readonly ILogger<PosState> logger;
         public List<Func<IUpdateRow, Task>> UpdateRow { get; set; } = new List<Func<IUpdateRow, Task>>();
+
+        internal void ClenupCustomers(string storeId)
+        {
+            var emptyCustomers = DatabaseContext.Customers
+                .Include(_ => _.Orders)
+                .Where(_ => _.StoreId == storeId)
+                .Where(_ => !_.Orders.Any())
+                .ToList();
+
+            DatabaseContext.Customers.RemoveRange(emptyCustomers);
+            DatabaseContext.SaveChanges();
+        }
+
         private Store Store { get; set; }
+
+        internal void UpdateStoreInfo(StoreSetupVm model)
+        {
+            var store = DatabaseContext.Stores.FirstOrDefault(_ => _.Id == model.StoreId);
+            store.PayoutSwishNumber = model.PayoutSwishNumber;
+            DatabaseContext.SaveChanges();
+        }
+
         public string StoreId => Store?.Id;
         public bool IsInitilized { get; set; }
 
