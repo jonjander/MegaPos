@@ -364,12 +364,11 @@ namespace MegaPOS.Service
             if (product == null)
                 return new List<PriceChangeEvent> { };
 
-            product.Decrease();
-
             var order = new Order(p, OrderType.Revenues, product.Price);
             c.LäggTillOrer(order);
-
             Store.Orders.Add(order);
+
+            product.Decrease();
 
             foreach (var item in storeProducts)
             {

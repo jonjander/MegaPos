@@ -34,6 +34,7 @@ namespace MegaPOS.Shared.ModalComponents.StoreSetup
             ExekveraSync(_ => _.ClenupCustomers(model.StoreId));
         }
 
+   
         public async Task Save()
         {
             ExekveraSync(_ => _.UpdateStoreInfo(model));
