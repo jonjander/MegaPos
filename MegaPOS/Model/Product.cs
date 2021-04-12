@@ -31,6 +31,7 @@ namespace MegaPOS.Model
 		private float GlobalProfit => Store?.ProfitTarget ?? 1.1f;
 
         public List<Order> Orders { get; set; }
+        public string Color { get; set; }
 
         public void UpdateMinPrice(float procentage)
 		{

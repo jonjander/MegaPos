@@ -18,6 +18,10 @@
                     <input type="file" accept="image/*" capture>
                 </Field>
                 <Field>
+                    <!--todo color-->
+                    <ColorEdit Color="#ffffff" ColorChanged="ChangeColor" />
+                </Field>
+                <Field>
                     <FieldLabel>Min price percentage</FieldLabel>
                     <NumericEdit @bind-Value="@model.MinPriceProcentage"
                                  Attributes="@(new Dictionary<string, object> { { "inputmode", "decimal" } })"
@@ -75,5 +79,11 @@
 
             modalRef.Hide();
         }
+    }
+
+
+    private void ChangeColor(string color)
+    {
+        model.Color = color;
     }
 }

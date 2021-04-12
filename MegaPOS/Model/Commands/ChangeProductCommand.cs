@@ -13,6 +13,7 @@ namespace MegaPOS.Model.Commands
         public float MinPriceProcentage { get; set; }
         public float LocalProfit { get; set; }
         public string StoreId { get; set; }
+        public string Color { get; set; }
         public ProductVm OriginalProduct { get; set; }
 
         public ChangeProductCommand(string StoreId)
@@ -27,6 +28,7 @@ namespace MegaPOS.Model.Commands
             Quantity = product.Quantity;
             LocalProfit = product.LocalProfit;
             MinPriceProcentage = product.MinPriceProcentage;
+            Color = product.Color;
         }
 
         public bool IsValid()

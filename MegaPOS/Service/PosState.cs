@@ -18,11 +18,12 @@ using MegaPOS.Enum;
 using System.Threading;
 using Microsoft.Extensions.Logging;
 using MegaPOS.Model.Interfaces;
+using MegaPOS.Model.UpdateRow;
 
 namespace MegaPOS.Service
 {
 
-    
+
     public class PosState
     {
         private readonly IUnitOfWork DatabaseContext;
@@ -121,6 +122,20 @@ namespace MegaPOS.Service
                 logger.LogError(ex, $"{ex.Message}");
                 return value;
             }
+        }
+
+        internal async Task ChangeProductColor(string productId, string color, HubConnection hubConnection)
+        {
+            var product = DatabaseContext.Products.FirstOrDefault(_ => _.Id == productId);
+            product.Color = color;
+            DatabaseContext.SaveChanges();
+
+            await hubConnection.SendAsync(nameof(MessageHub.SendProductColorChanged), new ProductColorChangedEvent
+            {
+                StoreId = StoreId,
+                Color = color,
+                ProductId = productId
+            });
         }
 
         private DbDebouncer<string> SaveCustomerNameDebouncer = new DbDebouncer<string>();
@@ -433,6 +448,17 @@ namespace MegaPOS.Service
             {
                 ProductId = productId,
                 Quantity = newQuantity
+            };
+
+            await Task.WhenAll(UpdateRow.Select(_ => _.Invoke(command)));
+        }
+
+        public async Task ColorChanged(string productId, string color)
+        {
+            var command = new UpdateRowColor
+            {
+                ProductId = productId,
+                Color = color
             };
 
             await Task.WhenAll(UpdateRow.Select(_ => _.Invoke(command)));

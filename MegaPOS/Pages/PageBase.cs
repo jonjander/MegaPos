@@ -78,6 +78,13 @@ namespace MegaPOS.Pages
                 }
             });
 
+            hubConnection.On<ProductColorChangedEvent>(SendMethods.ProductColorChanged.ToString(), async (Event) => {
+                if (StoreId == Event.StoreId)
+                {
+                    await Exekvera(posState => posState.ColorChanged(Event.ProductId, Event.Color));
+                }
+            });
+
             hubConnection.On<ProductAddedEvent>(SendMethods.ProductAdded.ToString(), async (Event) =>
             {
                 if (StoreId == Event.StoreId)

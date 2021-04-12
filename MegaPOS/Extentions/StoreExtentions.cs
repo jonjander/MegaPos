@@ -73,7 +73,8 @@ namespace MegaPOS.Extentions
                 ProductId = _.Id,
                 Quantity = _.Quantity,
                 LocalProfit = _.LocalProfit,
-                MinPriceProcentage = _.MinPriceProcentage
+                MinPriceProcentage = _.MinPriceProcentage,
+                Color = _.Color
             };
         public static List<ProductVm> ToVm(this IEnumerable<Product> products)
             => products.Select(_ => _.ToVm()).ToList();

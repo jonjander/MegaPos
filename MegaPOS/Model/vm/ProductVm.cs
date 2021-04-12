@@ -15,5 +15,6 @@ namespace MegaPOS.Model.vm
         public bool IsDisabled => Quantity <= 0;
 
         public float MinPriceProcentage { get; set; }
+        public string Color { get; set; }
     }
 }

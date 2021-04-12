@@ -1,4 +1,4 @@
-﻿using MegaPOS.Model;
+﻿using MegaPOS.Model.UpdateRow;
 using MegaPOS.Service;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;

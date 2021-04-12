@@ -112,6 +112,9 @@ namespace MegaPOS.Pages.Pos
 
             if (command.Quantity != command.OriginalProduct.Quantity)
                 ExekveraSync(posState => posState.ChangeProductQuantity(command.OriginalProduct.ProductId,  command.Quantity - command.OriginalProduct.Quantity));
+
+            if (command.Color != command.OriginalProduct.Color)
+                await Exekvera(posState => posState.ChangeProductColor(command.OriginalProduct.ProductId, command.Color, hubConnection));
         }
 
         protected void ParkCustomer()
