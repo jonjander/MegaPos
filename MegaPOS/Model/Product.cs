@@ -51,6 +51,7 @@ namespace MegaPOS.Model
         public Product()
         {
 			LocalProfit = GlobalProfit * 1.01f;
+			Color = "#000000";
 		}
 
 		public Product(string name, Store store, float price, int quantity)
@@ -61,6 +62,7 @@ namespace MegaPOS.Model
 			Quantity = quantity;
 			OriginalPrice = price;
 			LocalProfit = GlobalProfit * 1.01f;
+			Color = "#000000";
 		}
 
 		public void SetQuantity(string value)
@@ -86,20 +88,6 @@ namespace MegaPOS.Model
 			try
 			{
 				return Store.UpdateProductPrice(Id);
-				//Store.UpdateProductPrice();
-				//return _Price;
-
-				//var VolumePrice = 1f;
-				//if (Quantity < 2)
-				//	VolumePrice = LocalProfit * 1.2f;
-				//var profit = (LocalProfit + GlobalProfit) / 2f;
-				//var newPrice = OriginalPrice * profit * VolumePrice - Discount;
-
-				//var minPrice = OriginalPrice * MinPriceProcentage;
-				//if (newPrice < minPrice)
-				//	return MathF.Round(minPrice, 2);
-				//else
-				//	return MathF.Round(newPrice, 2);
 			} catch
             {
 				return 999;

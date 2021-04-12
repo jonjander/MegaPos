@@ -14,6 +14,7 @@ namespace MegaPOS.Model.Commands
         public float LocalProfit { get; set; }
         public string StoreId { get; set; }
         public string Color { get; set; }
+        public string Image { get; set;}
         public ProductVm OriginalProduct { get; set; }
 
         public ChangeProductCommand(string StoreId)

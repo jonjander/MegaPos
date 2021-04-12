@@ -1,4 +1,6 @@
-﻿@if (model != null)
+﻿@using System.IO
+
+@if (model != null)
 {
     
     <Modal @ref="modalRef">
@@ -14,12 +16,7 @@
                               @bind-Text="model.Name" />
                 </Field>
                 <Field>
-                    <!--todo upload image-->
-                    <input type="file" accept="image/*" capture>
-                </Field>
-                <Field>
-                    <!--todo color-->
-                    <ColorEdit Color="#ffffff" ColorChanged="ChangeColor" />
+                    <ColorEdit Color="@model.Color" ColorChanged="ChangeColor" />
                 </Field>
                 <Field>
                     <FieldLabel>Min price percentage</FieldLabel>
@@ -47,7 +44,7 @@
             </ModalBody>
             <ModalFooter>
                 <Button Color="Color.Secondary" Clicked="@HideModal">Close</Button>
-                <Button Color="Color.Primary" Clicked="@HideModal">Add product</Button>
+                <Button Color="Color.Primary" Clicked="@HideModal">Save</Button>
             </ModalFooter>
         </ModalContent>
     </Modal>
@@ -86,4 +83,5 @@
     {
         model.Color = color;
     }
+
 }

@@ -10,6 +10,7 @@ namespace MegaPOS.Migrations
                 name: "Color",
                 table: "Products",
                 type: "nvarchar(max)",
+                defaultValue: "#000000",
                 nullable: true);
         }
 

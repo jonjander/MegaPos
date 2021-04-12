@@ -1,5 +1,5 @@
-﻿<div class="product-card" >
-    <div @onclick="BuyProduct" style="width:100%; border-block:@(Model.Color);" class="interact-btn">
+﻿<div class="product-card" style="border-color:@(Model?.Color ?? "#ffffff");">
+    <div @onclick="BuyProduct" style="width:100%;" class="interact-btn">
         @if (Model.IsDisabled || Model.Quantity <= 0)
         {
             <h4 class="product-card-name"><del>@Model.Name</del></h4>
@@ -11,7 +11,7 @@
         <h5>@Model.Price.ToString("0.00") kr</h5>
         <p>Quantity : @Model.Quantity</p>
     </div>
-    <Button Clicked="@Edit" ><Icon Name="IconName.Edit" /></Button>
+    <Button Clicked="@Edit"><Icon Name="IconName.Edit" /></Button>
 </div>
 @code {
     [Parameter]public ProductVm Model { get; set; }
