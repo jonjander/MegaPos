@@ -37,9 +37,13 @@ namespace MegaPOS.Service
                 .Where(_ => _.StoreId == storeId)
                 .Where(_ => !_.Orders.Any())
                 .ToList();
+            if (emptyCustomers.Count > 1)
+            {
+                emptyCustomers = emptyCustomers.Take(emptyCustomers.Count - 1).ToList();
 
-            DatabaseContext.Customers.RemoveRange(emptyCustomers);
-            DatabaseContext.SaveChanges();
+                DatabaseContext.Customers.RemoveRange(emptyCustomers);
+                DatabaseContext.SaveChanges();
+            }
         }
 
         private Store Store { get; set; }
@@ -519,6 +523,8 @@ namespace MegaPOS.Service
                 .AsSplitQuery()
                 .Include(_ => _.Orders)
                 .ThenInclude(_ => _.Product)
+                .Include(_=>_.Orders)
+                .ThenInclude(_=>_.Customer)
                 .FirstOrDefault(_ => _.Id == storeId);
             var result = new StoreSetupVm
             {
@@ -529,8 +535,15 @@ namespace MegaPOS.Service
             result.StoreStats = new StoreStats
             {
                 TotalAssetWorth = store.Orders.Where(_ => _.Type == OrderType.Assets).Sum(_ => _.Debit),
-                TotalSold = store.Orders.Where(_=>_.Type == OrderType.Revenues).Sum(_=>_.Credit),
-                TotalMargin = store.Orders.Where(_ => _.Type == OrderType.Revenues).Sum(_ => _.Credit) - store.Orders.Where(_ => _.Type == OrderType.Revenues).Sum(_=>_.Product.OriginalPrice) 
+                TotalSold = store.Orders
+                    .Where(_=>_.Type == OrderType.Revenues)
+                    .Where(_ => _.Customer.Closed == true)
+                    .Sum(_=>_.Credit),
+                TotalMargin = store.Orders
+                    .Where(_ => _.Type == OrderType.Revenues)
+                    .Sum(_ => _.Credit) - store.Orders
+                                               .Where(_ => _.Type == OrderType.Revenues)
+                                               .Sum(_=>_.Product.OriginalPrice) 
             };
 
             return result;
