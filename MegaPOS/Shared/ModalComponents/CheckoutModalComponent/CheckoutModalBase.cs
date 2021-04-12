@@ -18,10 +18,12 @@ namespace MegaPOS.Shared.ModalComponents.CheckoutModalComponent
         [Inject] public PosState posState { get; set; }
         [Parameter] public EventCallback<string> OnCustomerPayed {get;set;}
         protected string SelectedCustomerId { get; set; }
-        protected Blazorise.Modal modalRef;
+        protected string SelectedCustomerName { get; set; }
+        protected Modal modalRef;
         protected CheckoutStages stage { get; set; } 
         protected string TerminalId;
         private HubConnection hubConnection;
+        
 
         protected List<string> AvalibleTerminals = new List<string>();
 
@@ -46,7 +48,8 @@ namespace MegaPOS.Shared.ModalComponents.CheckoutModalComponent
             AvalibleTerminals = new List<string>();
             TerminalId = null;
             SelectedCustomerId = customerVm.Id;
-            
+            SelectedCustomerName = customerVm.Name;
+
             modalRef.Show();
 
 
