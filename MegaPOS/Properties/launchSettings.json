@@ -19,6 +19,8 @@
     },
     "MegaPOS": {
       "commandName": "Project",
+      "executablePath": "C:\\Program Files\\dotnet\\dotnet.exe",
+      "commandLineArgs": "watch run",
       "launchBrowser": true,
       "launchUrl": "test3",
       "environmentVariables": {

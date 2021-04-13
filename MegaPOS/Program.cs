@@ -24,9 +24,8 @@ namespace MegaPOS
                     var keyvaultUri = Environment.GetEnvironmentVariable("VaultUri");
                     if (!string.IsNullOrEmpty(keyvaultUri))
                     {
-                        var keyVaultEndpoint = new Uri(Environment.GetEnvironmentVariable("VaultUri"));
                         config.AddAzureKeyVault(
-                            keyVaultEndpoint,
+                            new Uri(keyvaultUri),
                             new DefaultAzureCredential());
                     }
                 })
