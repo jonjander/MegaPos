@@ -1,6 +1,5 @@
 ﻿using MegaPOS.DBContext;
 using MegaPOS.Model;
-using MegaPOS.Pages.Leaderboard;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -224,22 +223,16 @@ namespace MegaPOS.Service
             product.Quantity += diff;
             if (diff <= 0)
             {
-                var nToRemove = Math.Abs(diff);
-                for (int i = 0; i < nToRemove; i++)
-                {
-                    var revertAsset = DatabaseContext.Orders
-                        .FirstOrDefault(_ => 
+                var revertAsset = DatabaseContext.Orders
+                        .FirstOrDefault(_ =>
                         _.ProductId == productId &&
                         _.Type == OrderType.Assets
                         );
-                    DatabaseContext.Orders.Remove(revertAsset);
-
-                    var revertExpences = DatabaseContext.Orders
-                        .FirstOrDefault(_ =>
-                        _.ProductId == productId &&
-                        _.Type == OrderType.Expences
-                        );
-                    DatabaseContext.Orders.Remove(revertExpences);
+                if (revertAsset != null)
+                {
+                    revertAsset.Quantity += diff;
+                    if (revertAsset.Quantity <= 0)
+                        DatabaseContext.Orders.Remove(revertAsset);
                 }
             }
             else
@@ -368,11 +361,12 @@ namespace MegaPOS.Service
             if (product == null)
                 return new List<PriceChangeEvent> { };
 
-            var order = new Order(p, OrderType.Revenues, product.Price);
+            var order = new Order(product, OrderType.Revenues, product.Price);
             c.LäggTillOrer(order);
             Store.Orders.Add(order);
-
             product.Decrease();
+            DatabaseContext.SaveChanges();
+
 
             foreach (var item in storeProducts)
             {

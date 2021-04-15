@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.JSInterop;
-using MegaPOS.Pages.Leaderboard;
 using MegaPOS.Model;
 using MegaPOS.Service;
 using MegaPOS.Shared.ModalComponents;

@@ -17,12 +17,7 @@ namespace MegaPOS.Model
 		public List<Order> Orders { get; set; }
 		public List<Product> Products { get; set; }
 
-
-		public float TotalAssets => Orders?
-			.Where(_ => _.Type == OrderType.Assets)
-			.Sum(o => o.Debit) ?? 0;
 		public float Balance => Orders?.Sum(o => o.Credit - o.Debit) ?? 0;
-		public float TotalAsset => Products?.Sum(p => p.OriginalPrice * p.Quantity) ?? 0;
 		public float PlannedProfit => Products?.Sum(p => p.OriginalPrice * p.ProductsSold * ProfitTarget) ?? 0;
 		public float ProfitMargin => Balance - PlannedProfit;
 		public float ProfitMarginAndTip => ProfitMargin + (Tip * TipPayback);
@@ -61,8 +56,7 @@ namespace MegaPOS.Model
 
         public void SetProfit(float profit)
 		{
-			this.ProfitTarget = profit;
-			
+			ProfitTarget = profit;
 		}
 
 		public void AddProduct(Product product)
@@ -86,33 +80,13 @@ namespace MegaPOS.Model
         }
 		
 
-		public void Updatediscount(DatabaseContext db)
-		{
-			//db.UpdateProductPrice(Id);
-			
-
-			//var marginshare = AssetProfitMarginShare;
-			//var outher = AvalibleProducts.ToList();
-			//if (marginshare > 0)
-			//{
-			//	foreach (var element in outher)
-			//	{
-			//		element.UpdateDiscount(marginshare);
-			//	}
-			//}
-		}
-
-		
-
-		
-
 		internal List<PriceSummary> GetProductPriceSummary(Product product)
 		{
 			return Orders.Where(p => p.Product.Id == product.Id)
-			.Where(p => p.Type == OrderType.Revenues)
-			.OrderBy(p => p.Date)
-			.Select(p => new PriceSummary(p))
-			.ToList();
+				.Where(p => p.Type == OrderType.Revenues)
+				.OrderBy(p => p.Date)
+				.Select(p => new PriceSummary(p))
+				.ToList();
 		}
 	}
 }

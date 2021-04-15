@@ -100,6 +100,9 @@ namespace MegaPOS.DBContext
                 .Property(_ => _.Id)
                 .ValueGeneratedOnAdd();
 
+            modelBuilder.Entity<Order>()
+                .Property(_=>_.Created)
+                .HasDefaultValueSql("GETDATE()");
 
             //Customer
             modelBuilder.Entity<Customer>()
@@ -114,6 +117,12 @@ namespace MegaPOS.DBContext
                .WithOne(_=>_.Customer)
                .HasForeignKey(_=>_.CustomerId)
                .OnDelete(DeleteBehavior.Cascade);
+
+
+            //Product
+            modelBuilder.Entity<Product>()
+                .Property(_ => _.Id)
+                .ValueGeneratedOnAdd();
 
         }
 

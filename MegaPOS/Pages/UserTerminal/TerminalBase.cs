@@ -13,6 +13,7 @@ using System.IO;
 using System.Drawing;
 using Microsoft.Extensions.Configuration;
 using MegaPOS.Extentions;
+using MegaPOS.Pages.LeaderboardPage;
 
 namespace MegaPOS.Pages.UserTerminal
 {
@@ -23,6 +24,7 @@ namespace MegaPOS.Pages.UserTerminal
         protected bool DisplaySummary { get; set; }
         protected List<OrderVm> Orders { get; set; }
         protected string QRCodeStr { get; set; }
+        protected Leaderboard leaderboard { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
@@ -83,6 +85,7 @@ namespace MegaPOS.Pages.UserTerminal
                     IsInUse = false;
                     DisplaySummary = false;
                     Orders = new List<OrderVm>();
+                    leaderboard.ReloadBoard();
                     StateHasChanged();
                 }
             });

@@ -88,7 +88,7 @@ namespace MegaPOS.Model
 			try
 			{
 				return Store.UpdateProductPrice(Id);
-			} catch
+			} catch (Exception ex)
             {
 				return 999;
             }

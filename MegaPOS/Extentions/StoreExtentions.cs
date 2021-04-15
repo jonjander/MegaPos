@@ -3,7 +3,7 @@ using MegaPOS.Enum;
 using MegaPOS.Model;
 using MegaPOS.Model.Events;
 using MegaPOS.Model.vm;
-using MegaPOS.Pages.Leaderboard;
+using MegaPOS.Pages.LeaderboardPage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using System;
@@ -93,7 +93,8 @@ namespace MegaPOS.Extentions
             => order == null ? default : new OrderVm { 
                 Price = order?.Credit ?? 0f,
                 ProductName = order?.Product?.Name,
-                Id = order.Id
+                Id = order.Id,
+                Created = order.Created
             };
 
         public static List<OrderVm> ToVm(this IEnumerable<Order> orders)
@@ -125,7 +126,7 @@ namespace MegaPOS.Extentions
         public static float UpdateProductPrice(this Store store, string productId)
         {
             float globalProfit = store.ProfitTarget;
-            float totalProductsInStore = store.Orders.Where(_ => _.Type == OrderType.Assets).Count();
+            float totalProductsInStore = store.Orders.Where(_ => _.Type == OrderType.Assets).Sum(_=>_.Quantity);
             float antalUnikaProdukter = store.Products.Count;
 
             var products = store.Products;
@@ -138,7 +139,7 @@ namespace MegaPOS.Extentions
                     _.Quantity,
                     LocalProfit = (_.LocalProfit + globalProfit) / 2f,
                     _.Orders,
-                    TotalNumber = _.Quantity + _.ProductsSold,
+                    TotalNumber = (float)_.Quantity + _.ProductsSold,
                     NumberSold = _.ProductsSold,
                 }).Select(_ => new
                 {
@@ -150,8 +151,8 @@ namespace MegaPOS.Extentions
                     _.TotalNumber,
                     _.NumberSold,
                     _.Orders,
-                    PercentageSold = _.NumberSold / _.TotalNumber,
-                    Popularity = _.NumberSold / totalProductsInStore
+                    PercentageSold = _.TotalNumber == 0f ? 0f : _.NumberSold / (float)_.TotalNumber,
+                    Popularity = totalProductsInStore == 0f ? 0f : _.NumberSold / (float)totalProductsInStore
                 }).ToList();
 
             var keys = stage1.OrderBy(_ => _.Id).Select(_ => $"{_.NumberSold}{_.LocalProfit}{_.TotalNumber}");
@@ -170,33 +171,30 @@ namespace MegaPOS.Extentions
             }
             var cahcekeyHash = sb.ToString();
             
-            if (!Global.memoryCache.TryGetValue(cahcekeyHash, out List<PriceCalc> stage5))
+          if (!Global.memoryCache.TryGetValue(cahcekeyHash, out List<PriceCalc> stage3))
             {
-                var PercentageSoldTotal = stage1.Sum(_ => _.PercentageSold) + 0.0001f;
-                var PopularityTotal = stage1.Sum(_ => _.Popularity) + 0.0001f;
+                float PercentageSoldTotal = stage1.Sum(_ => _.PercentageSold);
+                float PopularityTotal = stage1.Sum(_ => _.Popularity);
 
                 var stage2 = stage1.Select(_ => new
                 {
                     _.Id,
                     _.MinPriceProcentage,
                     _.OriginalPrice,
-                    _.Quantity,
+                    Quantity = (float)_.Quantity,
                     _.LocalProfit,
-                    _.TotalNumber,
-                    _.NumberSold,
+                    TotalNumber = (float)_.TotalNumber,
+                    NumberSold = (float)_.NumberSold,
                     _.Orders,
-                    h = _.PercentageSold / PercentageSoldTotal,
-                    hshift = (_.PercentageSold / PercentageSoldTotal) - (1f / antalUnikaProdukter),
-                    w = _.Popularity / PopularityTotal,
-                    wshift = (_.Popularity / PopularityTotal) - (1f / antalUnikaProdukter)
-                }).Select(_ => new {
+                    hshift = (PercentageSoldTotal == 0 ? 0 : _.PercentageSold / PercentageSoldTotal) - (1f / antalUnikaProdukter),
+                    wshift = (PopularityTotal == 0 ? 0 : _.Popularity / PopularityTotal) - (1f / antalUnikaProdukter)
+                }).Select(_ => new
+                {
                     _.Id,
                     _.MinPriceProcentage,
                     _.OriginalPrice,
                     _.Quantity,
                     _.LocalProfit,
-                    npw = 1f + _.wshift,
-                    nph = 1f + _.hshift,
                     npwh = (2f + _.wshift + _.hshift) / 2f,
                     hwshift = (_.hshift + _.wshift) / 2f,
                     PlannedProfit = _.OriginalPrice * _.TotalNumber * _.LocalProfit,
@@ -215,18 +213,20 @@ namespace MegaPOS.Extentions
                     LeftPerProduct = (_.PlannedProfit - _.Gains) / _.Quantity
                 }).ToList();
 
-                var totalMargin = stage2.Sum(_ => _.Margin);
+                float totalMargin = stage2.Sum(_ => _.Margin);
 
-                stage5 = stage2.Select(_ => new
+                stage3 = stage2.Select(_ => new
                 {
                     _.Id,
                     _.MinPriceProcentage,
+                    _.Quantity,
                     _.OriginalPrice,
                     NewPriceNoDiscount = _.LeftPerProduct * _.npwh * _.LocalProfit,
                     Discount = totalMargin * -_.hwshift
                 }).Select(_ => new PriceCalc
                 {
                     Id = _.Id,
+                    Quantity = _.Quantity,
                     MinPriceProcentage = _.MinPriceProcentage,
                     OriginalPrice = _.OriginalPrice,
                     Price = _.NewPriceNoDiscount - _.Discount
@@ -236,17 +236,22 @@ namespace MegaPOS.Extentions
                 var cacheEntryOptions = new MemoryCacheEntryOptions()
                     // Keep in cache for this time, reset time if accessed.
                     .SetSlidingExpiration(TimeSpan.FromMinutes(1));
-                Global.memoryCache.Set(cahcekeyHash, stage5, cacheEntryOptions);
+                Global.memoryCache.Set(cahcekeyHash, stage3, cacheEntryOptions);
             } else
             {
 
             }
-
+            
             var updateProducts = products.ToList();
-            var slectedProduct = stage5.FirstOrDefault(_ => _.Id == productId);
-            var calculatedPrice = slectedProduct?.Price ?? 0;
+            var slectedProduct = stage3.FirstOrDefault(_ => _.Id == productId);
+            var priceFactor = 1f;
+
+            if (slectedProduct.Quantity <= 5)
+                priceFactor += 0.3f * slectedProduct.Quantity;
+
+            var calculatedPrice = slectedProduct?.Price * priceFactor ?? 0f;
             var minPrice = slectedProduct.OriginalPrice * slectedProduct.MinPriceProcentage;
-            var maxPrice = slectedProduct.OriginalPrice * 10;
+            var maxPrice = slectedProduct.OriginalPrice * 10f;
             if (calculatedPrice < minPrice)
                 calculatedPrice = minPrice;
             if (calculatedPrice > maxPrice)

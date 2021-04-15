@@ -33,6 +33,20 @@
             }
         };
         window.requestAnimationFrame(step);
+    },
+    animateScroll: function (elementid) {
+        let obj = document.getElementById(elementid);
+        obj.scrollTo({ top: obj.scrollHeight, behavior: 'smooth' });
+        setTimeout(function () {
+            obj.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 4000);
+        setInterval(function () {
+            // 4000 - it will take 4 secound in total from the top of the page to the bottom
+            obj.scrollTo({ top: obj.scrollHeight, behavior: 'smooth' });
+            setTimeout(function () {
+                obj.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 4000);
+        }, 8000);
     }
-    
+
 }

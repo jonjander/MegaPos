@@ -1,20 +1,32 @@
 ﻿using MegaPOS.Extentions;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace MegaPOS.Pages.Leaderboard
+namespace MegaPOS.Pages.LeaderboardPage
 {
     public class LeaderboardBase : PageBase, IDisposable
     {
-        [Parameter]public string TerminalName { get; set; }
+        [Parameter] public string TerminalName { get; set; }
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
             ExekveraSync(posState => posState.OnProductAddedRemoved += ProductAdded);
             ExekveraSync(posState => posState.OnProductPriceChanged += RefreshPriceState);
+            
+        }
+
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            //await Animatescroll("board");
+        }
+
+        public void ReloadBoard()
+        {
+            LoadViewModel();
         }
 
         private void ProductAdded(object sender, EventArgs e)
@@ -42,6 +54,9 @@ namespace MegaPOS.Pages.Leaderboard
             ExekveraSync(posState => posState.OnProductPriceChanged -= RefreshPriceState);
             base.Dispose();
         }
+
+        public async Task Animatescroll(string elementId)
+            => await JSRuntime.InvokeVoidAsync("Leaderboard.animateScroll", elementId);
 
     }
 }

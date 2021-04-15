@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace MegaPOS.Pages.Leaderboard
+namespace MegaPOS.Pages.LeaderboardPage
 {
     public class RowBase : ComponentBase, IDisposable
     {
@@ -40,14 +40,12 @@ namespace MegaPOS.Pages.Leaderboard
                     var updatedprice = updated as UpdateRowPrice;
                     RowModel.Update(updatedprice);
                     await AnimerPris(updatedprice.OldPrice, updatedprice.NewPrice);
-                }
-
-                if (updated is UpdateRowName)
+                } else if (updated is UpdateRowName)
                 {
-                    var updatedprice = updated as UpdateRowName;
-                    RowModel.Name = updatedprice.NewName;
+                    var updateRow = updated as UpdateRowName;
+                    RowModel.Name = updateRow.NewName;
+                    StateHasChanged();
                 }
-                
             }
         }
 

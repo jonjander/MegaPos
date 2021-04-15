@@ -59,7 +59,7 @@
             <div class="cart-rows-container">
                 @if (Customer != null && Customer.Orders.Any())
                 {
-                    @foreach (var item in Customer?.Orders)
+                    @foreach (var item in Customer?.Orders.OrderBy(_=>_.Created))
                     {
                         <div Class="cart-row">
                             <div class="cart-row-name">

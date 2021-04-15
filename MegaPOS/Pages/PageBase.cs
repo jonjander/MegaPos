@@ -20,7 +20,6 @@ namespace MegaPOS.Pages
         protected HubConnection hubConnection { get; set; }
         [Inject] public NavigationManager NavigationManager { get; set; }
         [Inject] public IJSRuntime JSRuntime { get; set; }
-        //[Inject] public PosState posState { get; set; }
         protected string StoreId => GetStoreId();
 
         protected StoreViewModel Model { get; set; } = new StoreViewModel();
@@ -46,7 +45,7 @@ namespace MegaPOS.Pages
             LoadViewModel();
         }
 
-        private void LoadViewModel()
+        protected void LoadViewModel()
         {
             Model = new StoreViewModel();
             Model.Products = ExekveraSync(posState => posState.GetAllProducts(posState.StoreId));

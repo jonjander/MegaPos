@@ -19,8 +19,11 @@ namespace MegaPOS.Model
         public string CustomerId { get;  set; }
         public Store Store { get; set; }
         public string StoreId { get; set; }
+        public DateTime Created { get; set; }
+		public int Quantity { get; set; }
 
-        public Order()
+
+		public Order()
         {
 
         }
@@ -29,6 +32,7 @@ namespace MegaPOS.Model
 			Date = DateTime.Now;
 			Product = product;
 			Type = type;
+			Quantity = quantity; 
 			if (type == OrderType.Assets)
 			{
 				Debit = value * quantity;

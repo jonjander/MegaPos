@@ -1,4 +1,4 @@
-﻿using MegaPOS.Pages.Leaderboard;
+﻿using MegaPOS.Pages.LeaderboardPage;
 using System;
 using System.Collections.Generic;
 using System.Linq;
