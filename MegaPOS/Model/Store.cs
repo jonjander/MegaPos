@@ -59,12 +59,7 @@ namespace MegaPOS.Model
 			ProfitTarget = profit;
 		}
 
-		public void AddProduct(Product product)
-		{
-			Products.Add(product);
-			Orders.Add(new Order(product, OrderType.Assets, product.OriginalPrice, product.Quantity));
-			Orders.Add(new Order(product, OrderType.Expences, product.OriginalPrice, product.Quantity));
-		}
+	
 
 		public Store(float globalprofit, string name)
 		{

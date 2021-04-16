@@ -106,7 +106,7 @@ namespace MegaPOS.Pages
                     
                     StateHasChanged();
                     ExekuteSync(posState => posState.InvokeProductAddedRemoved());
-                    //ExekuteSync(posState => posState.InvokeProductPriceChanged());
+                    ExekuteSync(posState => posState.InvokeProductPriceChanged());
 
                     foreach (var item in Model.Products)
                     {
@@ -124,15 +124,13 @@ namespace MegaPOS.Pages
             {
                 if (StoreId == ChangeEventArgs.StoreId)
                 {
-                    //update leaderboard
-                    var allProducts = ExecuteSync(_ => _.GetAllProducts(ChangeEventArgs.StoreId));
-                    var product = allProducts.FirstOrDefault(_ => _.Id == ChangeEventArgs.ProductId);
-                    Model.Products = Model.Products.UpdatePrice(ChangeEventArgs, product.Price);
-                    Model.LeaderboardRows = Model.LeaderboardRows.UpdatePrice(ChangeEventArgs, product.Price);
+                
+                    Model.Products = Model.Products.UpdatePrice(ChangeEventArgs, ChangeEventArgs.NewPrice);
+                    Model.LeaderboardRows = Model.LeaderboardRows.UpdatePrice(ChangeEventArgs, ChangeEventArgs.NewPrice);
 
                     ExekuteSync(posState => posState.InvokeProductPriceChanged());
                     
-                    await ExecuteAsync(posState => posState.PriceChanged(ChangeEventArgs.ProductId, ChangeEventArgs.OldPrice, product.Price));
+                    await ExecuteAsync(posState => posState.PriceChanged(ChangeEventArgs.ProductId, ChangeEventArgs.OldPrice, ChangeEventArgs.NewPrice));
                 }
             });
         }

@@ -17,6 +17,12 @@
       "type": "mssql.azure",
       "connectionId": "DefaultConnection",
       "secretStore": "AzureKeyVault"
+    },
+    "signalr1": {
+      "type": "signalr",
+      "connectionId": "",
+      "suggestion": "true",
+      "ignored": "true"
     }
   }
 }
