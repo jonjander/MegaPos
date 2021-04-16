@@ -76,7 +76,7 @@ namespace MegaPOS.Service
             }
         }
 
-        private DbDebouncer<float> ChangeGlobalProfitDebouncer = new DbDebouncer<float>();
+        private readonly DbDebouncer<float> ChangeGlobalProfitDebouncer = new();
         
         internal async Task<float> ChangeGlobalProfit(float value, HubConnection hubConnection)
         {
@@ -132,20 +132,22 @@ namespace MegaPOS.Service
       
         private async Task<string> SaveName(string id, string value)
         {
-            try
-            {
-                var customer = DatabaseContext
-                    .Customers
-                    .FirstOrDefault(_ => _.Id == id);
-                customer.Name = value;
-                DatabaseContext.SaveChanges();
-                logger.LogInformation($"Wrote {value}");
-                return customer.Name;
-            } catch (Exception ex)
-            {
-                logger.LogError(ex, $"{ex.Message}");
-                return value;
-            }
+            return await Task.Run(()=>{ 
+                try
+                {
+                    var customer = DatabaseContext
+                        .Customers
+                        .FirstOrDefault(_ => _.Id == id);
+                    customer.Name = value;
+                    DatabaseContext.SaveChanges();
+                    logger.LogInformation($"Wrote {value}");
+                    return customer.Name;
+                } catch (Exception ex)
+                {
+                    logger.LogError(ex, $"{ex.Message}");
+                    return value;
+                }
+            });
         }
 
         internal async Task ChangeProductColor(string productId, string color, HubConnection hubConnection)
@@ -162,11 +164,11 @@ namespace MegaPOS.Service
             });
         }
 
-        private DbDebouncer<string> SaveCustomerNameDebouncer = new DbDebouncer<string>();
+        private readonly DbDebouncer<string> SaveCustomerNameDebouncer = new();
 
         internal async Task SaveCustomerName(string id, string value)
         {
-            Func<Task<string>> editTask = () => SaveName(id, value);
+            Task<string> editTask() => SaveName(id, value);
             await SaveCustomerNameDebouncer.PoolAndRun(editTask);
 
         }

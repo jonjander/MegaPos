@@ -21,7 +21,7 @@ namespace MegaPOS.Model
 		public float PlannedProfit => Products?.Sum(p => p.OriginalPrice * p.ProductsSold * ProfitTarget) ?? 0;
 		public float ProfitMargin => Balance - PlannedProfit;
 		public float ProfitMarginAndTip => ProfitMargin + (Tip * TipPayback);
-		private float TipPayback = 0.5f;
+		private float TipPayback { get; set; } = 0.5f;
 
         private float Tip { get; set; }
 		public float AssetProfitMarginShare

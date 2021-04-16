@@ -2,25 +2,25 @@
 @page "/{id}"
 @inherits PosBase
 
-<AddProductModal @ref="addProductModal"
+<AddProductModal @ref="AddProductModal"
                  StoreId="@StoreId"
                  OnAddProduct="AddProduct"/>
-<CustomersModal @ref="customersModal"
+<CustomersModal @ref="CustomersModal"
                 OnSelectedCustomer="ChangeCustomer" />
 
-<CheckoutModal @ref="checkoutModal" 
+<CheckoutModal @ref="CheckoutModal" 
                OnCustomerPayed="CustomerPayed"/>
 
-<ChangeProductModal @ref="changeProductModal"
+<ChangeProductModal @ref="ChangeProductModal"
                     StoreId="@StoreId"
                     OnProductChanged="ChangeProduct" />
 
-<StoreSetup @ref="storeSetup" 
+<StoreSetup @ref="StoreSetup" 
             StoreId="@StoreId"/>
 
 <Row Class="pos-head">
     <Column ColumnSize="ColumnSize.Is4" Style="padding-left: 4px; padding-right: 5px;">
-        <Button Clicked="addProductModal.ShowModal"
+        <Button Clicked="AddProductModal.ShowModal"
                 Color="Color.Primary">
             + product
         </Button>
@@ -34,7 +34,7 @@
         </Field>
     </Column>
     <Column ColumnSize="ColumnSize.Is3" Style="padding-left: 4px; padding-right: 5px;">
-        <Button Clicked="customersModal.ShowModal"
+        <Button Clicked="CustomersModal.ShowModal"
                 Color="Color.Primary">
             Customers
         </Button>

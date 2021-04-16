@@ -19,12 +19,12 @@ namespace MegaPOS.Pages.UserTerminal
 {
     public class TerminalBase : PageBase
     {
-        [Parameter] public string name { get; set; }
+        [Parameter] public string Name { get; set; }
         private bool IsInUse { get; set; }
         protected bool DisplaySummary { get; set; }
         protected List<OrderVm> Orders { get; set; }
         protected string QRCodeStr { get; set; }
-        protected Leaderboard leaderboard { get; set; }
+        protected Leaderboard Leaderboard { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
@@ -34,8 +34,8 @@ namespace MegaPOS.Pages.UserTerminal
 
         public void GenereateQRCode(string customer)
         {
-            var message = $"{name} {customer}".Truncate(50);
-            var storeSetup = ExekveraSync(_ => _.GetStoreSetup(StoreId));
+            var message = $"{Name} {customer}".Truncate(50);
+            var storeSetup = ExecuteSync(_ => _.GetStoreSetup(StoreId));
 
             var text = $"C{storeSetup.PayoutSwishNumber};{Orders.Sum(_=>_.Price).ToString("0.00").Replace(",",".")};{message};0";
             if (!string.IsNullOrEmpty(text))
@@ -51,47 +51,47 @@ namespace MegaPOS.Pages.UserTerminal
         protected override void SetupMessageHub()
         {
             base.SetupMessageHub();
-            hubConnection.On<FindTerminalEvent>(SendMethods.FindTerminal.ToString(), async (Event) =>
+            HubConnection.On<FindTerminalEvent>(SendMethods.FindTerminal.ToString(), async (Event) =>
             {
-                if (StoreId == Event.StoreId && !IsInUse && !string.IsNullOrEmpty(name))
+                if (StoreId == Event.StoreId && !IsInUse && !string.IsNullOrEmpty(Name))
                 {
-                    await hubConnection.SendAsync(nameof(MessageHub.SendTeminalFound), new TerminalFoundEvent { 
+                    await HubConnection.SendAsync(nameof(MessageHub.SendTeminalFound), new TerminalFoundEvent { 
                         StoreId = StoreId,
-                        ConnectionId = hubConnection.ConnectionId,
-                        TerminalId = name,
+                        ConnectionId = HubConnection.ConnectionId,
+                        TerminalId = Name,
                         CustomerId = Event.CustomerId
                     });
                 }
             });
 
-            hubConnection.On<OpenTermnialEvent>(SendMethods.OpenTerminal.ToString(), async (Event) => {
-                if (StoreId == Event.StoreId && name == Event.TerminalId)
+            HubConnection.On<OpenTermnialEvent>(SendMethods.OpenTerminal.ToString(), async (Event) => {
+                if (StoreId == Event.StoreId && Name == Event.TerminalId)
                 {
                     if (!IsInUse)
                     {
                         IsInUse = true;
-                        await hubConnection.SendAsync(nameof(MessageHub.SendOpenTerminalConfirmation), new OpenTerminalConfirmationEvent
+                        await HubConnection.SendAsync(nameof(MessageHub.SendOpenTerminalConfirmation), new OpenTerminalConfirmationEvent
                         {
                             StoreId = StoreId,
-                            TerminalId = name,
+                            TerminalId = Name,
                             CustomerId = Event.CustomerId
                         });
                     }
                 }
             });
-            hubConnection.On<CloseTerminalEvent>(SendMethods.CloseTerminal.ToString(), async (Event) => {
-                if (StoreId == Event.StoreId && name == Event.TerminalId)
+            HubConnection.On<CloseTerminalEvent>(SendMethods.CloseTerminal.ToString(), (Event) => {
+                if (StoreId == Event.StoreId && Name == Event.TerminalId)
                 {
                     IsInUse = false;
                     DisplaySummary = false;
                     Orders = new List<OrderVm>();
-                    leaderboard.ReloadBoard();
+                    Leaderboard.ReloadBoard();
                     StateHasChanged();
                 }
             });
 
-            hubConnection.On<TerminalSummaryEvent>(SendMethods.TerminalSummary.ToString(), async (Event) => {
-                if (StoreId == Event.StoreId && name == Event.TerminalId && IsInUse)
+            HubConnection.On<TerminalSummaryEvent>(SendMethods.TerminalSummary.ToString(), (Event) => {
+                if (StoreId == Event.StoreId && Name == Event.TerminalId && IsInUse)
                 {
                     Orders = Event.Orders;
                     GenereateQRCode(Event.CustomerId);

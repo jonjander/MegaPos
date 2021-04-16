@@ -2,7 +2,9 @@
 
 namespace MegaPOS.Migrations
 {
+#pragma warning disable IDE1006 // Naming Styles
     public partial class order1 : Migration
+#pragma warning restore IDE1006 // Naming Styles
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

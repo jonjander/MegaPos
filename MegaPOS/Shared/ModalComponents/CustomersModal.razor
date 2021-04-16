@@ -34,7 +34,7 @@
     private List<CustomerVm> model { get; set; } = new List<CustomerVm>();
     private Modal modalRef;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         model = new List<CustomerVm>();
     }

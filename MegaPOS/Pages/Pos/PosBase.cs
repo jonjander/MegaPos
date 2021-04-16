@@ -21,11 +21,11 @@ namespace MegaPOS.Pages.Pos
     public class PosBase : PageBase
     {
 
-        protected AddProductModal addProductModal { get; set; }
-        protected CustomersModal customersModal { get; set; }
-        protected CheckoutModal checkoutModal { get; set; }
-        protected ChangeProductModal changeProductModal { get; set; }
-        protected StoreSetup storeSetup { get; set; }
+        protected AddProductModal AddProductModal { get; set; }
+        protected CustomersModal CustomersModal { get; set; }
+        protected CheckoutModal CheckoutModal { get; set; }
+        protected ChangeProductModal ChangeProductModal { get; set; }
+        protected StoreSetup StoreSetup { get; set; }
 
         protected CustomerVm Customer { get; set; }
 
@@ -34,7 +34,7 @@ namespace MegaPOS.Pages.Pos
         protected override void SetupMessageHub()
         {
             base.SetupMessageHub();
-            hubConnection.On<GlobalProfitChangeEvent>(SendMethods.GlobalProfitChanged.ToString(), (Event) =>
+            HubConnection.On<GlobalProfitChangeEvent>(SendMethods.GlobalProfitChanged.ToString(), (Event) =>
             {
                 if (StoreId == Event.StoreId)
                 {
@@ -49,85 +49,85 @@ namespace MegaPOS.Pages.Pos
         {
             GlobalProfit = value;
             var v = (float)value / 100;
-            await Exekvera(posState => posState.ChangeGlobalProfit(v, hubConnection));
+            await ExecureAsync(posState => posState.ChangeGlobalProfit(v, HubConnection));
         }
 
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
             NewCustomer();
-            var current = ExekveraSync(posState => posState.GetGlobalProfit());
+            var current = ExecuteSync(posState => posState.GetGlobalProfit());
             GlobalProfit = (int)(current * 100);
         }
 
         protected void NewCustomer()
         {
-            Customer = ExekveraSync(posState => posState.GetNewCustomer());
+            Customer = ExecuteSync(posState => posState.GetNewCustomer());
         }
 
         protected async Task AddProduct(NewProductCommand product)
         {
-            await Exekvera(posState => posState.AddNewProduct(product, hubConnection));
+            await ExecuteAsync(posState => posState.AddNewProduct(product, HubConnection));
                 
         }
 
         protected void ChangeCustomer(string customerId)
         {
-            Customer = ExekveraSync(posState => posState.LoadCustmer(customerId));
+            Customer = ExecuteSync(posState => posState.LoadCustmer(customerId));
         }
 
         protected async Task ChangeCustomerName(string value)
         {
             Customer.Name = value;
-            await Exekvera(posState => posState.SaveCustomerName(Customer.Id, value));
+            await ExecuteAsync(posState => posState.SaveCustomerName(Customer.Id, value));
         }
 
         protected async Task BuyProduct(ProductVm product)
         {
-            await Exekvera(posState => posState.BuyProduct(Customer.Id, product.ProductId, hubConnection));
-            Customer.Orders = ExekveraSync(posState => posState.GetCustomerOrders(Customer.Id));
+            await ExecuteAsync(posState => posState.BuyProduct(Customer.Id, product.Id, HubConnection));
+            Customer.Orders = ExecuteSync(posState => posState.GetCustomerOrders(Customer.Id));
         }
 
         protected async Task Checkout()
         {
             if (Customer.Id != null)
-                await checkoutModal.ShowModal(Customer);
+                await CheckoutModal.ShowModal(Customer);
         }
 
         protected void CustomerPayed(string customerId)
         {
-            ExekveraSync(posState => posState.Checkout(customerId));
+            ExekuteSync(posState => posState.Checkout(customerId));
             NewCustomer();
         }
 
         protected async Task ChangeProduct(ChangeProductCommand command)
         {
             if (command.LocalProfit != command.OriginalProduct.LocalProfit)
-                ExekveraSync(posState => posState.ChangeProductLocalProfit(command.OriginalProduct.ProductId, command.LocalProfit));
+                ExekuteSync(posState => posState.ChangeProductLocalProfit(command.OriginalProduct.Id, command.LocalProfit));
 
             if (command.Name != command.OriginalProduct.Name)
-                await Exekvera(posState => posState.ChangeProductName(command.OriginalProduct.ProductId, command.Name, hubConnection));
+                await ExecuteAsync(posState => posState.ChangeProductName(command.OriginalProduct.Id, command.Name, HubConnection));
 
             if (command.MinPriceProcentage != command.OriginalProduct.MinPriceProcentage)
-                await Exekvera(posState => posState.ChangeProductMinPriceProcentage(command.OriginalProduct.ProductId, command.MinPriceProcentage, hubConnection));
+                await ExecuteAsync(posState => posState.ChangeProductMinPriceProcentage(command.OriginalProduct.Id, command.MinPriceProcentage, HubConnection));
 
             if (command.Quantity != command.OriginalProduct.Quantity)
-                ExekveraSync(posState => posState.ChangeProductQuantity(command.OriginalProduct.ProductId,  command.Quantity - command.OriginalProduct.Quantity));
+                ExekuteSync(posState => posState.ChangeProductQuantity(command.OriginalProduct.Id,  command.Quantity - command.OriginalProduct.Quantity));
 
             if (command.Color != command.OriginalProduct.Color)
-                await Exekvera(posState => posState.ChangeProductColor(command.OriginalProduct.ProductId, command.Color, hubConnection));
+                await ExecuteAsync(posState => posState.ChangeProductColor(command.OriginalProduct.Id, command.Color, HubConnection));
         }
 
         protected void ParkCustomer()
         {
             if (Customer.Orders != null && Customer.Orders.Any())
-                Customer = ExekveraSync(posState => posState.GetNewCustomer());
+                Customer = ExecuteSync(posState => posState.GetNewCustomer());
         }
 
 
         protected async Task RemoveProduct(string orderId, string customerId)
         {
-            await Exekvera(posState => posState.RemoveProduct(orderId, customerId, hubConnection));
+            await ExecuteAsync(posState => posState.RemoveProduct(orderId, customerId, HubConnection));
             Customer.Orders = Customer.Orders
                 .Where(_ => _.Id != orderId)
                 .ToList();
@@ -135,13 +135,13 @@ namespace MegaPOS.Pages.Pos
 
         protected void OpenEditModal(ProductVm product)
         {
-            ProductVm loadedproduct = ExekveraSync(_ => _.GetProduct(product.ProductId));
-            changeProductModal.ShowModal(loadedproduct);
+            ProductVm loadedproduct = ExecuteSync(_ => _.GetProduct(product.Id));
+            ChangeProductModal.ShowModal(loadedproduct);
         }
 
         protected void OpenSetupModal()
         {
-            storeSetup.OpenModal();
+            StoreSetup.OpenModal();
         }
     }
 }

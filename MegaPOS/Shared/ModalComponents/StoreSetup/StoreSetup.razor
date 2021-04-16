@@ -1,5 +1,5 @@
 ﻿@inherits StoreSetupBase
-@if (model != null)
+@if (Model != null)
 {
     <Modal @ref="modalRef">
         <ModalContent IsCentered="true">
@@ -12,11 +12,11 @@
                     <FieldLabel>Name</FieldLabel>
                     <TextEdit Placeholder="Name"
                               Disabled="true"
-                              @bind-Text="model.Name" />
+                              @bind-Text="Model.Name" />
                 </Field>
                 <Field>
                     <FieldLabel>Swish number</FieldLabel>
-                    <TextEdit @bind-Text="@model.PayoutSwishNumber"
+                    <TextEdit @bind-Text="@Model.PayoutSwishNumber"
                               MaskType="MaskType.RegEx"
                               EditMask="^[\d]{0,13}$"
                               Placeholder="Swish number" />
@@ -26,9 +26,9 @@
                     <Button Color="Color.Danger" Clicked="EraseUnusedCustomers">Erase customers</Button>
                 </Field>
                 <Field>
-                    <p>Total assets @(model.StoreStats.TotalAssetWorth.ToString("0.00"))kr</p><br />
-                    <p>Total margin @(model.StoreStats.TotalMargin.ToString("0.00"))kr</p><br />
-                    <p>Total sold @(model.StoreStats.TotalSold.ToString("0.00"))kr</p>
+                    <p>Total assets @(Model.StoreStats.TotalAssetWorth.ToString("0.00"))kr</p><br />
+                    <p>Total margin @(Model.StoreStats.TotalMargin.ToString("0.00"))kr</p><br />
+                    <p>Total sold @(Model.StoreStats.TotalSold.ToString("0.00"))kr</p>
                 </Field>
             </ModalBody>
             <ModalFooter>

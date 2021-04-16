@@ -18,12 +18,13 @@ namespace MegaPOS.Extentions
     public static class StoreExtentions
     {
         public static LeaderboardRowModel ToLeaderboardModel(this ProductVm _)
-        => new LeaderboardRowModel
-            {
+        => new()
+        {
+                Id = _.Id,
                 Order = 0,
                 Price = _.Price,
                 Name = _.Name,
-                ProductId = _.ProductId
+                ProductId = _.Id
             };
         public static List<LeaderboardRowModel> ToLeaderboardModel(this IEnumerable<ProductVm> products)
         {
@@ -44,22 +45,22 @@ namespace MegaPOS.Extentions
             return updateOrdernumber;
         }
 
-        public static List<LeaderboardRowModel> UpdatePrice(this List<LeaderboardRowModel> rows, PriceChangeEvent updateEvent)
+        public static List<LeaderboardRowModel> UpdatePrice(this List<LeaderboardRowModel> rows, PriceChangeEvent updateEvent, float newPrice)
         {
             var rowToUpdate = rows.FirstOrDefault(_ => _.ProductId == updateEvent.ProductId);
             if (rowToUpdate != null)
             {
-                rowToUpdate.Price = updateEvent.NewPrice;
+                rowToUpdate.Price = newPrice;
             }
             return rows;
         }
 
-        public static List<ProductVm> UpdatePrice(this List<ProductVm> rows, PriceChangeEvent updateEvent)
+        public static List<ProductVm> UpdatePrice(this List<ProductVm> rows, PriceChangeEvent updateEvent, float newPrice)
         {
-            var rowToUpdate = rows.FirstOrDefault(_ => _.ProductId == updateEvent.ProductId);
+            var rowToUpdate = rows.FirstOrDefault(_ => _.Id == updateEvent.ProductId);
             if (rowToUpdate != null)
             {
-                rowToUpdate.Price = updateEvent.NewPrice;
+                rowToUpdate.Price = newPrice;
                 rowToUpdate.Quantity = updateEvent.NewQuantity;
             }
             return rows;
@@ -70,7 +71,7 @@ namespace MegaPOS.Extentions
             {
                 Price = _.Price,
                 Name = _.Name,
-                ProductId = _.Id,
+                Id = _.Id,
                 Quantity = _.Quantity,
                 LocalProfit = _.LocalProfit,
                 MinPriceProcentage = _.MinPriceProcentage,
@@ -108,7 +109,8 @@ namespace MegaPOS.Extentions
             return value.Length <= maxLength ? value : value.Substring(0, maxLength);
         }
         public static QueueWrapper<T> Wrap<T>(this T obj)
-            => new QueueWrapper<T> { Object = obj };
+            => new()
+            { Object = obj };
 
         public static void DropFist<T>(this QueueWrapper<List<T>> wrapper)
         {
@@ -127,9 +129,11 @@ namespace MegaPOS.Extentions
         {
             float globalProfit = store.ProfitTarget;
             float totalProductsInStore = store.Orders.Where(_ => _.Type == OrderType.Assets).Sum(_=>_.Quantity);
-            float antalUnikaProdukter = store.Products.Count;
+            float numberOfUniqueProducts = store.Products.Count;
 
-            var products = store.Products;
+            var products = store.Products
+                .Distinct(new ProductComparer())
+                .ToList();
             var stage1 = products
                 .Select(_ => new
                 {
@@ -157,14 +161,14 @@ namespace MegaPOS.Extentions
 
             var keys = stage1.OrderBy(_ => _.Id).Select(_ => $"{_.NumberSold}{_.LocalProfit}{_.TotalNumber}");
             var statKey = string.Join("", keys);
-            var cahcekey = $"{statKey}{globalProfit}{totalProductsInStore}{antalUnikaProdukter}";
+            var cahcekey = $"{statKey}{globalProfit}{totalProductsInStore}{numberOfUniqueProducts}";
 
             using var md5 = MD5.Create();
             byte[] inputBytes = Encoding.ASCII.GetBytes(cahcekey);
             byte[] hashBytes = md5.ComputeHash(inputBytes);
 
             // Convert the byte array to hexadecimal string
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             for (int i = 0; i < hashBytes.Length; i++)
             {
                 sb.Append(hashBytes[i].ToString("X2"));
@@ -186,8 +190,8 @@ namespace MegaPOS.Extentions
                     TotalNumber = (float)_.TotalNumber,
                     NumberSold = (float)_.NumberSold,
                     _.Orders,
-                    hshift = (PercentageSoldTotal == 0 ? 0 : _.PercentageSold / PercentageSoldTotal) - (1f / antalUnikaProdukter),
-                    wshift = (PopularityTotal == 0 ? 0 : _.Popularity / PopularityTotal) - (1f / antalUnikaProdukter)
+                    hshift = (PercentageSoldTotal == 0 ? 0 : _.PercentageSold / PercentageSoldTotal) - (1f / numberOfUniqueProducts),
+                    wshift = (PopularityTotal == 0 ? 0 : _.Popularity / PopularityTotal) - (1f / numberOfUniqueProducts)
                 }).Select(_ => new
                 {
                     _.Id,

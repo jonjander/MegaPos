@@ -13,8 +13,8 @@ namespace MegaPOS.Pages
     {
         [Parameter] public string Id { get; set; }
         [Inject] protected IServiceScopeFactory ScopeFactory { get; set; }
-        [Inject] PosState posState { get; set; }
-        public async Task<TResult> Exekvera<TResult>(
+        [Inject] PosState PosState { get; set; }
+        public async Task<TResult> ExecureAsync<TResult>(
             Expression<Func<PosState, Task<TResult>>> serviceMethod,
             Func<TResult, Task> efterbehandling = null
             )
@@ -24,7 +24,7 @@ namespace MegaPOS.Pages
                 var serviceMethodCall = serviceMethod.Compile();
                 using var serviceScope = ScopeFactory.CreateScope();
                 //var service = posState; 
-                var service = posState; // serviceScope.ServiceProvider.GetService<PosState>();
+                var service = PosState; // serviceScope.ServiceProvider.GetService<PosState>();
                 if (!service.IsInitilized)
                     service.Init(Id);
 
@@ -34,27 +34,29 @@ namespace MegaPOS.Pages
                 return result;
             } catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 throw;
             }
         }
 
-        public async Task Exekvera(Func<PosState, Task> serviceMethod)
+        public async Task ExecuteAsync(Func<PosState, Task> serviceMethod)
         {
             try
             {
                 //using var serviceScope = ScopeFactory.CreateScope();
-                var service = posState;  //serviceScope.ServiceProvider.GetService<PosState>();
+                var service = PosState;  //serviceScope.ServiceProvider.GetService<PosState>();
                 if (!service.IsInitilized)
                     service.Init(Id);
                 await serviceMethod(service);
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 throw;
             }
         }
 
-        public TResult ExekveraSync<TResult>(
+        public TResult ExecuteSync<TResult>(
             Func<PosState, TResult> serviceMethod
             )
         {
@@ -62,7 +64,7 @@ namespace MegaPOS.Pages
             {
                 
                 //using var serviceScope = ScopeFactory.CreateScope();
-                var service = posState; // serviceScope.ServiceProvider.GetService<PosState>();
+                var service = PosState; // serviceScope.ServiceProvider.GetService<PosState>();
                 var result = serviceMethod(service);
                 return result;
             }
@@ -72,14 +74,14 @@ namespace MegaPOS.Pages
             }
         }
 
-        public void ExekveraSync(
+        public void ExekuteSync(
             Action<PosState> serviceMethod
             )
         {
             try
             {
                 //using var serviceScope = ScopeFactory.CreateScope();
-                var service = posState; // serviceScope.ServiceProvider.GetService<PosState>();
+                var service = PosState; // serviceScope.ServiceProvider.GetService<PosState>();
                 serviceMethod(service);
             }
             catch

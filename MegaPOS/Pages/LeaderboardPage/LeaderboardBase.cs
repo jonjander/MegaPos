@@ -14,15 +14,16 @@ namespace MegaPOS.Pages.LeaderboardPage
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
-            ExekveraSync(posState => posState.OnProductAddedRemoved += ProductAdded);
-            ExekveraSync(posState => posState.OnProductPriceChanged += RefreshPriceState);
+            ExekuteSync(posState => posState.OnProductAddedRemoved += ProductAdded);
+            ExekuteSync(posState => posState.OnProductPriceChanged += RefreshPriceState);
             
         }
 
-        protected override async Task OnAfterRenderAsync(bool firstRender)
-        {
-            //await Animatescroll("board");
-        }
+        //protected override async Task OnAfterRenderAsync(bool firstRender)
+        //{
+        //    //todo
+        //    //await Animatescroll("board");
+        //}
 
         public void ReloadBoard()
         {
@@ -50,9 +51,10 @@ namespace MegaPOS.Pages.LeaderboardPage
 
         public override void Dispose()
         {
-            ExekveraSync(posState => posState.OnProductAddedRemoved -= RefreshPriceState);
-            ExekveraSync(posState => posState.OnProductPriceChanged -= RefreshPriceState);
+            ExekuteSync(posState => posState.OnProductAddedRemoved -= RefreshPriceState);
+            ExekuteSync(posState => posState.OnProductPriceChanged -= RefreshPriceState);
             base.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         public async Task Animatescroll(string elementId)

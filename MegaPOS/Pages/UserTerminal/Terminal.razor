@@ -2,7 +2,7 @@
 @using MegaPOS.Pages.LeaderboardPage;
 @inherits TerminalBase
 
-<h1>Terminal @name</h1>
+<h1>Terminal @Name</h1>
 @if (DisplaySummary)
 {
     <Row>
@@ -29,6 +29,6 @@
     </Row>
 } else {
     <Leaderboard Id="@Id" 
-                 TerminalName="@name"
-                 @ref="leaderboard"/>
+                 TerminalName="@Name"
+                 @ref="Leaderboard"/>
 }

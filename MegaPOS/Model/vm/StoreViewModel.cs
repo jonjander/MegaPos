@@ -16,7 +16,6 @@ namespace MegaPOS.Model.vm
                 .OrderByDescending(_ => _.Price)
                 .ToList() ?? new List<ProductVm>();
 
-
         public StoreViewModel()
         {
             Products = new List<ProductVm>();

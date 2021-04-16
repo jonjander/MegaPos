@@ -8,6 +8,6 @@ namespace MegaPOS.Model
 {
     public static class Global
     {
-        public static MemoryCache memoryCache = new MemoryCache(new MemoryCacheOptions());
+        public static readonly MemoryCache memoryCache = new(new MemoryCacheOptions());
     }
 }

@@ -12,32 +12,31 @@ namespace MegaPOS.Shared.ModalComponents.StoreSetup
     public class StoreSetupBase : ServiceCallerBase
     {
         [Parameter] public string StoreId { get; set; }
-        protected StoreSetupVm model { get; set; }
+        protected StoreSetupVm Model { get; set; }
         protected Modal modalRef;
 
-        protected override async Task OnInitializedAsync()
+        protected override void OnInitialized()
         {
-            model = new StoreSetupVm { StoreId = StoreId };
+            Model = new StoreSetupVm { StoreId = StoreId };
         }
 
         public void OpenModal()
         {
 
             //Get stats
-            model = ExekveraSync(_ => _.GetStoreSetup(StoreId));
+            Model = ExecuteSync(_ => _.GetStoreSetup(StoreId));
 
             modalRef.Show();
         }
 
-        protected async Task EraseUnusedCustomers()
+        protected void EraseUnusedCustomers()
         {
-            ExekveraSync(_ => _.ClenupCustomers(model.StoreId));
+            ExekuteSync(_ => _.ClenupCustomers(Model.StoreId));
         }
-
    
-        public async Task Save()
+        public void Save()
         {
-            ExekveraSync(_ => _.UpdateStoreInfo(model));
+            ExekuteSync(_ => _.UpdateStoreInfo(Model));
             modalRef.Hide();
         }
         public void Close()

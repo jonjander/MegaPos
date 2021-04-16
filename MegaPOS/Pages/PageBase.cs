@@ -14,10 +14,10 @@ using System.Threading.Tasks;
 
 namespace MegaPOS.Pages
 {
-    public class PageBase : ServiceCallerBase, IDisposable
+    public class PageBase : ServiceCallerBase, IDisposable, IAsyncDisposable
     {
         
-        protected HubConnection hubConnection { get; set; }
+        protected HubConnection HubConnection { get; set; }
         [Inject] public NavigationManager NavigationManager { get; set; }
         [Inject] public IJSRuntime JSRuntime { get; set; }
         protected string StoreId => GetStoreId();
@@ -27,109 +27,116 @@ namespace MegaPOS.Pages
 
         private string GetStoreId()
         {
-            return ExekveraSync(_ => _.StoreId);
+            return ExecuteSync(_ => _.StoreId);
         }
 
         public virtual void Dispose()
         {
-            if (hubConnection != null)
-                _ = hubConnection.DisposeAsync();
+            GC.SuppressFinalize(this);
+        }
+
+        public virtual async ValueTask DisposeAsync()
+        {
+            if (HubConnection != null)
+                await HubConnection.DisposeAsync();
         }
 
         protected override async Task OnInitializedAsync()
         {
-            ExekveraSync(_ => _.Init(Id));
-            hubConnection = MessageHub.SetupMessageHub(NavigationManager);
+            ExekuteSync(_ => _.Init(Id));
+            HubConnection = MessageHub.SetupMessageHub(NavigationManager);
             SetupMessageHub();
-            await hubConnection.StartAsync();
+            await HubConnection.StartAsync();
             LoadViewModel();
         }
 
         protected void LoadViewModel()
         {
-            Model = new StoreViewModel();
-            Model.Products = ExekveraSync(posState => posState.GetAllProducts(posState.StoreId));
-            Model.LeaderboardRows = Model.AvalibleProducts.ToLeaderboardModel();
+            Model = new StoreViewModel
+            {
+                Products = ExecuteSync(posState => posState.GetAllProducts(posState.StoreId)),
+                LeaderboardRows = Model.AvalibleProducts.ToLeaderboardModel()
+            };
         }
 
 
         protected virtual void SetupMessageHub()
         {
-            hubConnection.On<QuantityEvent>(SendMethods.QuantityChanged.ToString(), (Event) =>
+            HubConnection.On<QuantityEvent>(SendMethods.QuantityChanged.ToString(), (Event) =>
             {
-                
                 if (StoreId == Event.StoreId)
                 {
-                    Model.Products.FirstOrDefault(_ => _.ProductId == Event.ProductId).Quantity = Event.NewQuantity;
+                    Model.Products.FirstOrDefault(_ => _.Id == Event.ProductId).Quantity = Event.NewQuantity;
                     if (Event.NewQuantity <= 0)
                         Model.LeaderboardRows.FirstOrDefault(_ => _.ProductId == Event.ProductId).IsDisabled = true;
-                    ExekveraSync(_ => _.InvokeProductAddedRemoved());
-                    ExekveraSync(_ => _.InvokeProductPriceChanged());
+                    ExekuteSync(_ => _.InvokeProductAddedRemoved());
+                    ExekuteSync(_ => _.InvokeProductPriceChanged());
                 }
             });
 
-            hubConnection.On<ProductNameChanged>(SendMethods.ProductNameChange.ToString(), async (Event) => {
+            HubConnection.On<ProductNameChanged>(SendMethods.ProductNameChange.ToString(), async (Event) => {
                 if (StoreId == Event.StoreId)
                 {
-                    Model.Products.FirstOrDefault(_ => _.ProductId == Event.ProductId).Name = Event.Name;
+                    Model.Products.FirstOrDefault(_ => _.Id == Event.ProductId).Name = Event.Name;
                     Model.LeaderboardRows.FirstOrDefault(_ => _.ProductId == Event.ProductId).Name = Event.Name;
-                    await Exekvera(posState => posState.NameChanged(Event.ProductId, Event.Name));
+                    await ExecuteAsync(posState => posState.NameChanged(Event.ProductId, Event.Name));
                 }
             });
 
-            hubConnection.On<ProductColorChangedEvent>(SendMethods.ProductColorChanged.ToString(), async (Event) => {
+            HubConnection.On<ProductColorChangedEvent>(SendMethods.ProductColorChanged.ToString(), async (Event) => {
                 if (StoreId == Event.StoreId)
                 {
-                    await Exekvera(posState => posState.ColorChanged(Event.ProductId, Event.Color));
+                    await ExecuteAsync(posState => posState.ColorChanged(Event.ProductId, Event.Color));
                 }
             });
 
-            hubConnection.On<ProductAddedEvent>(SendMethods.ProductAdded.ToString(), async (Event) =>
+            HubConnection.On<ProductAddedEvent>(SendMethods.ProductAdded.ToString(), async (Event) =>
             {
                 if (StoreId == Event.StoreId)
                 {
-                    Model.Products.Add(Event.Product);
+                    if (Model.Products.DoNotContain(Event.Product))
+                        Model.Products.Add(Event.Product);
+
                     var nyProduct = Event.Product.ToLeaderboardModel();
-                    Model.LeaderboardRows.Add(nyProduct);
-                    Model.LeaderboardRows = Model.LeaderboardRows.UpdateOrder();
+                    if (Model.LeaderboardRows.DoNotContain(nyProduct))
+                    {
+                        Model.LeaderboardRows.Add(nyProduct);
+                        Model.LeaderboardRows = Model.LeaderboardRows.UpdateOrder();
+                    }
+                    
                     StateHasChanged();
-                    ExekveraSync(posState => posState.InvokeProductAddedRemoved());
-                    ExekveraSync(posState => posState.InvokeProductPriceChanged());
-                    foreach (var item in Model.LeaderboardRows)
+                    ExekuteSync(posState => posState.InvokeProductAddedRemoved());
+                    //ExekuteSync(posState => posState.InvokeProductPriceChanged());
+
+                    foreach (var item in Model.Products)
                     {
-                        if (item.ProductId == Event.Product.ProductId)
-                            await Exekvera(posState => posState.PriceChanged(item.ProductId, 0, item.Price));
-                        else
-                            await Exekvera(posState => posState.PriceChanged(item.ProductId, item.Price, item.Price));
+                        await ExecuteAsync(posState => posState.QuantityChanged(item.Id, item.Quantity));
                     }
 
                     foreach (var item in Model.Products)
                     {
-                        await Exekvera(posState => posState.QuantityChanged(item.ProductId, item.Quantity));
-                    }
-
-                    foreach (var item in Model.Products)
-                    {
-                        await Exekvera(posState => posState.NameChanged(item.ProductId, item.Name));
+                        await ExecuteAsync(posState => posState.NameChanged(item.Id, item.Name));
                     }
                 }
             });
 
-            hubConnection.On<PriceChangeEvent>(SendMethods.PriceChanged.ToString(), async (ChangeEventArgs) =>
+            HubConnection.On<PriceChangeEvent>(SendMethods.PriceChanged.ToString(), async (ChangeEventArgs) =>
             {
                 if (StoreId == ChangeEventArgs.StoreId)
                 {
                     //update leaderboard
-                    Model.Products = Model.Products.UpdatePrice(ChangeEventArgs);
-                    Model.LeaderboardRows = Model.LeaderboardRows.UpdatePrice(ChangeEventArgs);
-                    //Model.LeaderboardRows = Model.LeaderboardRows.UpdateOrder();
+                    var allProducts = ExecuteSync(_ => _.GetAllProducts(ChangeEventArgs.StoreId));
+                    var product = allProducts.FirstOrDefault(_ => _.Id == ChangeEventArgs.ProductId);
+                    Model.Products = Model.Products.UpdatePrice(ChangeEventArgs, product.Price);
+                    Model.LeaderboardRows = Model.LeaderboardRows.UpdatePrice(ChangeEventArgs, product.Price);
 
-                    ExekveraSync(posState => posState.InvokeProductPriceChanged());
+                    ExekuteSync(posState => posState.InvokeProductPriceChanged());
                     
-                    await Exekvera(posState => posState.PriceChanged(ChangeEventArgs.ProductId, ChangeEventArgs.OldPrice, ChangeEventArgs.NewPrice));
+                    await ExecuteAsync(posState => posState.PriceChanged(ChangeEventArgs.ProductId, ChangeEventArgs.OldPrice, product.Price));
                 }
             });
         }
-       
+
+        
     }
 }

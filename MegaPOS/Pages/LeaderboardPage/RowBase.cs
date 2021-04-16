@@ -12,18 +12,19 @@ namespace MegaPOS.Pages.LeaderboardPage
     public class RowBase : ComponentBase, IDisposable
     {
         [Parameter] public LeaderboardRowModel RowModel { get; set; }
-        [Inject] public PosState posState { get; set; }
+        [Inject] public PosState PosState { get; set; }
         [Inject] public IJSRuntime JSRuntime { get; set; }
         protected int AnimeringsHastighet { get; set; } = 2500;
 
         public void Dispose()
         {
-            posState.UpdateRow.Remove(UpdateRowHandler);
+            PosState.UpdateRow.Remove(UpdateRowHandler);
+            GC.SuppressFinalize(this);
         }
 
         protected override void OnInitialized()
         {
-            posState.UpdateRow.Add(UpdateRowHandler);
+            PosState.UpdateRow.Add(UpdateRowHandler);
         }
 
         protected async Task AnimerPris(float tidigarePris, float nyttPris)

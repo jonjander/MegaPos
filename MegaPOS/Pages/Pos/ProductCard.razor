@@ -44,27 +44,29 @@
 
     public async Task Update(IUpdateRow updated)
     {
-        if (updated.ProductId == Model.ProductId)
-        {
-            if (updated is UpdateRowPrice)
+        await Task.Run(() => {
+            if (updated.ProductId == Model.Id)
             {
-                var updatedprice = updated as UpdateRowPrice;
-                Model.Price = updatedprice.NewPrice;
-            } else if (updated is UpdateRowQuantity)
-            {
-                var u = updated as UpdateRowQuantity;
-                Model.Quantity = u.Quantity;
-            } else if (updated is UpdateRowName)
-            {
-                var updatedprice = updated as UpdateRowName;
-                Model.Name = updatedprice.NewName;
-            } else if (updated is UpdateRowColor)
-            {
-                var colorupdate = updated as UpdateRowColor;
-                Model.Color = colorupdate.Color;
-            }
-            StateHasChanged();
-        }
+                if (updated is UpdateRowPrice)
+                {
+                    var updatedprice = updated as UpdateRowPrice;
+                    Model.Price = updatedprice.NewPrice;
+                } else if (updated is UpdateRowQuantity)
+                {
+                    var u = updated as UpdateRowQuantity;
+                    Model.Quantity = u.Quantity;
+                } else if (updated is UpdateRowName)
+                {
+                    var updatedprice = updated as UpdateRowName;
+                    Model.Name = updatedprice.NewName;
+                } else if (updated is UpdateRowColor)
+                {
+                    var colorupdate = updated as UpdateRowColor;
+                    Model.Color = colorupdate.Color;
+                }
 
+            }
+        });
+        StateHasChanged();
     }
 }
