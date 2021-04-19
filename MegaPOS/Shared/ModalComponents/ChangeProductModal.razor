@@ -50,8 +50,8 @@
                 </Field>
             </ModalBody>
             <ModalFooter>
-                <Button Color="Color.Secondary" Clicked="@HideModal">Close</Button>
-                <Button Color="Color.Primary" Clicked="@HideModal">Save</Button>
+                <Button Color="Color.Secondary" Clicked="@Close">Close</Button>
+                <Button Color="Color.Primary" Clicked="@Save">Save</Button>
             </ModalFooter>
         </ModalContent>
     </Modal>
@@ -75,7 +75,11 @@
         modalRef.Show();
     }
 
-    public async Task HideModal()
+    public void Close(){
+        modalRef.Hide();
+    }
+
+    public async Task Save()
     {
         if (model.IsValid())
         {

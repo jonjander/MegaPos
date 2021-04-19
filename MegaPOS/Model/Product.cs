@@ -22,7 +22,7 @@ namespace MegaPOS.Model
 		public int ProductsSold { get; set; }
 		public float LocalProfit { get; set; }
 		public float MinPriceProcentage { get; set; } = 0.9f;
-		public float MaxPriceProcentage { get; set; }
+		public float MaxPriceProcentage { get; set; } = 5f;
 		public float Price => GetPrice();
 		private float GlobalProfit => Store?.ProfitTarget ?? 1.1f;
 
