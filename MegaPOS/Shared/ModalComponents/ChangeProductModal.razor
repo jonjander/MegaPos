@@ -21,11 +21,19 @@
                 </Field>
                 <Field>
                     <FieldLabel>Min price percentage</FieldLabel>
-                    <Slider TValue="float" 
+                    <Slider TValue="float"
                             @bind-Value="@model._MinPriceProcentage"
                             Min="1f"
-                            Max="100f" />
-                    <p>@(model.MinPriceProcentage)%</p>
+                            Max="1000f" />
+                    <p>@(model.MinPriceProcentage * 100f)%</p>
+                </Field>
+                <Field>
+                    <FieldLabel>Max price percentage</FieldLabel>
+                    <Slider TValue="float"
+                            @bind-Value="@model._MaxPriceProcentage"
+                            Min="1f"
+                            Max="1000f" />
+                    <p>@(model.MaxPriceProcentage * 100f)%</p>
                 </Field>
                 <Field>
                     <FieldLabel>Quantity</FieldLabel>
@@ -37,8 +45,8 @@
                     <Slider TValue="float"
                             @bind-Value="@model._LocalProfit"
                             Min="1f"
-                            Max="100f" />
-                    <p>@(model.LocalProfit)%</p>
+                            Max="1000f" />
+                    <p>@(model.LocalProfit * 100f)%</p>
                 </Field>
             </ModalBody>
             <ModalFooter>

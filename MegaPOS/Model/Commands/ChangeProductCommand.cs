@@ -19,6 +19,18 @@ namespace MegaPOS.Model.Commands
                 _MinPriceProcentage = value * 100f;
             }
         }
+        public float _MaxPriceProcentage { get; set; }
+        public float MaxPriceProcentage
+        {
+            get
+            {
+                return (float)_MaxPriceProcentage / 100;
+            }
+            set
+            {
+                _MaxPriceProcentage = value * 100f;
+            }
+        }
         public float _LocalProfit { get; set; }
         public float LocalProfit
         {

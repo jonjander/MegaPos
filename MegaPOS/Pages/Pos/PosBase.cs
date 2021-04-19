@@ -111,13 +111,17 @@ namespace MegaPOS.Pages.Pos
 
             if (command.MinPriceProcentage != command.OriginalProduct.MinPriceProcentage)
                 await ExecuteAsync(posState => posState.ChangeProductMinPriceProcentage(command.OriginalProduct.Id, command.MinPriceProcentage, HubConnection));
+            
+            if (command.MaxPriceProcentage != command.OriginalProduct.MaxPriceProcentage)
+                await ExecuteAsync(posState => posState.ChangeProductMaxPriceProcentage(command.OriginalProduct.Id, command.MaxPriceProcentage, HubConnection));
 
             if (command.Quantity != command.OriginalProduct.Quantity)
                 await ExecuteAsync(posState => posState.ChangeProductQuantity(command.OriginalProduct.Id,  command.Quantity - command.OriginalProduct.Quantity, HubConnection));
 
             if (command.Color != command.OriginalProduct.Color)
                 await ExecuteAsync(posState => posState.ChangeProductColor(command.OriginalProduct.Id, command.Color, HubConnection));
-        }
+        
+                    }
 
         protected void ParkCustomer()
         {

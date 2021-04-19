@@ -118,6 +118,8 @@ namespace MegaPOS.Service
             });
         }
 
+        
+
         internal CustomerVm LoadCustmer(string customerId)
         {
             var customer = DatabaseContext.Customers
@@ -179,6 +181,35 @@ namespace MegaPOS.Service
                 Name = name,
                 ProductId = productId
             });
+        }
+
+        internal async Task ChangeProductMaxPriceProcentage(string productId, float maxPriceProcentage, HubConnection hubConnection)
+        {
+            var storeProducts = GetAllProducts(StoreId);
+            var changeEvent = storeProducts.Select(_ =>
+                new PriceChangeEvent
+                {
+                    ProductId = _.Id,
+                    OldPrice = _.Price,
+                    NewQuantity = _.Quantity
+                }).ToList();
+
+            var product = GetProduct(productId);
+            product.UpdateMaxPrice(maxPriceProcentage);
+            DatabaseContext.SaveChanges();
+
+            foreach (var item in storeProducts)
+            {
+                var change = changeEvent.FirstOrDefault(_ => _.ProductId == item.Id);
+                change.NewPrice = item.Price;
+                change.NewQuantity = item.Quantity;
+            }
+
+            foreach (var item in changeEvent)
+            {
+                item.StoreId = StoreId;
+                await hubConnection.SendAsync(nameof(MessageHub.SendPriceChanged), item);
+            }
         }
 
         internal async Task ChangeProductMinPriceProcentage(string productId, float minPriceProcentage, HubConnection hubConnection)

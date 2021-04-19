@@ -27,13 +27,19 @@ namespace MegaPOS.Model
 
         public List<Order> Orders { get; set; }
         public string Color { get; set; }
+        public float MaxPriceProcentage { get; set; }
 
-		public void UpdateMinPrice(float procentage)
+        public void UpdateMinPrice(float procentage)
 		{
 			MinPriceProcentage = procentage;
 		}
 
-        public Product()
+		public void UpdateMaxPrice(float procentage)
+		{
+			MaxPriceProcentage = procentage;
+		}
+
+		public Product()
         {
 			LocalProfit = GlobalProfit * 1.01f;
 			Color = "#000000";
