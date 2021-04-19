@@ -42,14 +42,8 @@ namespace MegaPOS.Model
 			Tip += value;
 		}
 
-		public int TotalProductsSold => Products.Sum(p => p.ProductsSold);
 		public float ProfitTarget { get; private set; }
-		
-		[NotMapped]
-		public List<Product> AvalibleProducts
-			=> Products?.Where(p => p.Quantity > 0)
-				.OrderByDescending(_ => _.Price)
-				.ToList() ?? new List<Product>();
+	
 
         public string Name { get; set; }
         public string PayoutSwishNumber { get; set; }

@@ -27,7 +27,7 @@ namespace MegaPOS.Model
         {
 
         }
-		public Order(Product product, OrderType type, float value, int quantity = 1)
+		public Order(string storeId, Product product, OrderType type, float value, int quantity = 1)
 		{
 			Date = DateTime.Now;
 			Product = product;

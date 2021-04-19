@@ -15,6 +15,7 @@ using MegaPOS.Model.vm;
 using MegaPOS.Model.Events;
 using MegaPOS.Shared.ModalComponents.CheckoutModalComponent;
 using MegaPOS.Shared.ModalComponents.StoreSetup;
+using MegaPOS.Extentions;
 
 namespace MegaPOS.Pages.Pos
 {
@@ -96,14 +97,14 @@ namespace MegaPOS.Pages.Pos
 
         protected void CustomerPayed(string customerId)
         {
-            ExekuteSync(posState => posState.Checkout(customerId));
+            ExecuteSync(posState => posState.Checkout(customerId));
             NewCustomer();
         }
 
         protected async Task ChangeProduct(ChangeProductCommand command)
         {
             if (command.LocalProfit != command.OriginalProduct.LocalProfit)
-                ExekuteSync(posState => posState.ChangeProductLocalProfit(command.OriginalProduct.Id, command.LocalProfit));
+                ExecuteSync(posState => posState.ChangeProductLocalProfit(command.OriginalProduct.Id, command.LocalProfit));
 
             if (command.Name != command.OriginalProduct.Name)
                 await ExecuteAsync(posState => posState.ChangeProductName(command.OriginalProduct.Id, command.Name, HubConnection));
@@ -112,7 +113,7 @@ namespace MegaPOS.Pages.Pos
                 await ExecuteAsync(posState => posState.ChangeProductMinPriceProcentage(command.OriginalProduct.Id, command.MinPriceProcentage, HubConnection));
 
             if (command.Quantity != command.OriginalProduct.Quantity)
-                ExekuteSync(posState => posState.ChangeProductQuantity(command.OriginalProduct.Id,  command.Quantity - command.OriginalProduct.Quantity));
+                await ExecuteAsync(posState => posState.ChangeProductQuantity(command.OriginalProduct.Id,  command.Quantity - command.OriginalProduct.Quantity, HubConnection));
 
             if (command.Color != command.OriginalProduct.Color)
                 await ExecuteAsync(posState => posState.ChangeProductColor(command.OriginalProduct.Id, command.Color, HubConnection));
@@ -135,7 +136,7 @@ namespace MegaPOS.Pages.Pos
 
         protected void OpenEditModal(ProductVm product)
         {
-            ProductVm loadedproduct = ExecuteSync(_ => _.GetProduct(product.Id));
+            ProductVm loadedproduct = ExecuteSync(_ => _.GetProduct(product.Id).ToVm());
             ChangeProductModal.ShowModal(loadedproduct);
         }
 

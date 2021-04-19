@@ -80,9 +80,7 @@ namespace MegaPOS.Service
         {
             return await ChangeGlobalProfitDebouncer.PoolAndRun(async () => {
                 //Get current state
-                var storeProducts = DatabaseContext.Products
-                    .Where(_ => _.StoreId == StoreId)
-                    .ToList();
+                var storeProducts = GetAllProducts(StoreId);
                 var changeEvent = storeProducts.Select(_ =>
                     new PriceChangeEvent
                     {
@@ -150,7 +148,7 @@ namespace MegaPOS.Service
 
         internal async Task ChangeProductColor(string productId, string color, HubConnection hubConnection)
         {
-            var product = DatabaseContext.Products.FirstOrDefault(_ => _.Id == productId);
+            var product = GetProduct(productId);
             product.Color = color;
             DatabaseContext.SaveChanges();
 
@@ -172,7 +170,7 @@ namespace MegaPOS.Service
 
         internal async Task ChangeProductName(string productId, string name, HubConnection hubConnection)
         {
-            var product = DatabaseContext.Products.FirstOrDefault(_ => _.Id == productId);
+            var product = GetProduct(productId);
             product.Name = name;
             DatabaseContext.SaveChanges();
 
@@ -185,9 +183,7 @@ namespace MegaPOS.Service
 
         internal async Task ChangeProductMinPriceProcentage(string productId, float minPriceProcentage, HubConnection hubConnection)
         {
-            var storeProducts = DatabaseContext.Products
-                .Where(_ => _.StoreId == StoreId)
-                .ToList();
+            var storeProducts = GetAllProducts(StoreId);
             var changeEvent = storeProducts.Select(_ =>
                 new PriceChangeEvent
                 {
@@ -196,7 +192,7 @@ namespace MegaPOS.Service
                     NewQuantity = _.Quantity
                 }).ToList();
 
-            var product = DatabaseContext.Products.FirstOrDefault(_ => _.Id == productId);
+            var product = GetProduct(productId);
             product.UpdateMinPrice(minPriceProcentage);
             DatabaseContext.SaveChanges();
 
@@ -214,10 +210,12 @@ namespace MegaPOS.Service
             }
         }
 
-        internal void ChangeProductQuantity(string productId, int diff)
+
+
+        internal async Task ChangeProductQuantity(string productId, int diff, HubConnection hubConnection)
         {
             //todo send change event for price and quantity
-            var product = DatabaseContext.Products.FirstOrDefault(_ => _.Id == productId);
+            var product = GetProduct(productId);
             product.Quantity += diff;
             if (diff <= 0)
             {
@@ -230,7 +228,9 @@ namespace MegaPOS.Service
                 {
                     revertAsset.Quantity += diff;
                     if (revertAsset.Quantity <= 0)
+                    {
                         DatabaseContext.Orders.Remove(revertAsset);
+                    }
                 }
             }
             else
@@ -240,14 +240,19 @@ namespace MegaPOS.Service
                     DatabaseContext.Products.Add(product);
                 }
             }
+            await hubConnection.SendAsync(nameof(MessageHub.SendQuantityChanged),
+                    new QuantityEvent
+                    {
+                        StoreId = StoreId,
+                        ProductId = productId,
+                        NewQuantity = product.Quantity
+                    });
             DatabaseContext.SaveChanges();
         }
 
         internal async Task RemoveProduct(string orderId, string customerId, HubConnection hubConnection)
         {
-            var storeProducts = DatabaseContext.Products
-                .Where(_ => _.StoreId == StoreId)
-                .ToList();
+            var storeProducts = GetAllProducts(StoreId);
             var changeEvent = storeProducts.Select(_ =>
                 new PriceChangeEvent
                 {
@@ -289,7 +294,7 @@ namespace MegaPOS.Service
 
         internal void ChangeProductLocalProfit(string productId, float localProfit)
         {
-            var product = DatabaseContext.Products.FirstOrDefault(_ => _.Id == productId);
+            var product = GetProduct(productId);
             product.SetProfit(localProfit);
             DatabaseContext.SaveChanges();
         }
@@ -339,9 +344,7 @@ namespace MegaPOS.Service
 
         public List<PriceChangeEvent> SellProduct(Customer c, Product p)
         {
-            var storeProducts = DatabaseContext.Products
-                .Where(_ => _.StoreId == StoreId)
-                .ToList();
+            var storeProducts = GetAllProducts(StoreId);
             var changeEvent = storeProducts.Select(_ =>
                 new PriceChangeEvent
                 {
@@ -359,7 +362,7 @@ namespace MegaPOS.Service
             if (product == null)
                 return new List<PriceChangeEvent> { };
 
-            var order = new Order(product, OrderType.Revenues, product.Price);
+            var order = new Order(StoreId, product, OrderType.Revenues, product.Price);
             c.LäggTillOrer(order);
             DatabaseContext.Orders.Add(order);
             product.Decrease();
@@ -378,7 +381,7 @@ namespace MegaPOS.Service
 
         internal async Task BuyProduct(string costumerId, string productId, HubConnection hubConnection)
         {
-            var product = DatabaseContext.Products.FirstOrDefault(_ => _.Id == productId);
+            var product = GetProduct(productId);
             var customer = DatabaseContext.Customers.FirstOrDefault(_ => _.Id == costumerId);
             var priceChangeEvents = SellProduct(customer, product);
             DatabaseContext.SaveChanges();
@@ -412,7 +415,7 @@ namespace MegaPOS.Service
 
         internal async Task AddNewProduct(NewProductCommand product, HubConnection hubConnection)
         {
-            var allStoreProducts = GetAllProducts(StoreId);
+            var allStoreProducts = GetAllProducts(StoreId).ToVm();
             var products = allStoreProducts
                 .Select(_ => new PriceChangeEvent { 
                     StoreId = StoreId,
@@ -421,8 +424,14 @@ namespace MegaPOS.Service
                 })
                 .ToList();
 
+            var currentstore = DatabaseContext.Stores
+                .Include(_=>_.Products)
+                .Include(_=>_.Orders)
+                .FirstOrDefault(_ => _.Id == StoreId);
+
             var p = new Product
             {
+                Store = currentstore,
                 LocalProfit = product.LocalProfit,
                 OriginalPrice = product.Price,
                 Quantity = product.Quantity,
@@ -431,8 +440,8 @@ namespace MegaPOS.Service
             };
       
             var newProduct = DatabaseContext.Products.Add(p);
-            DatabaseContext.Orders.Add(new Order(p, OrderType.Assets, p.OriginalPrice, product.Quantity));
-            DatabaseContext.Orders.Add(new Order(p, OrderType.Expences, p.OriginalPrice, product.Quantity));
+            DatabaseContext.Orders.Add(new Order(StoreId, p, OrderType.Assets, p.OriginalPrice, product.Quantity));
+            DatabaseContext.Orders.Add(new Order(StoreId, p, OrderType.Expences, p.OriginalPrice, product.Quantity));
             DatabaseContext.SaveChanges();
 
 
@@ -449,7 +458,7 @@ namespace MegaPOS.Service
                 NewQuantity = p.Quantity
             });
 
-            var allProducts = GetAllProducts(StoreId);
+            var allProducts = GetAllProducts(StoreId).ToVm();
 
             await hubConnection.SendAsync(nameof(MessageHub.SendProductAdded), addedEvent);
             foreach (var item in products)
@@ -461,13 +470,7 @@ namespace MegaPOS.Service
             }
         }
 
-        internal List<ProductVm> GetAllProducts(string storeId)
-        {
-            var result = DatabaseContext.Products
-                         .Where(_ => _.StoreId == storeId)
-                         .ToList();
-            return result.ToVm();
-        }
+
 
         public event EventHandler OnProductAddedRemoved;
         public void InvokeProductAddedRemoved()
@@ -537,8 +540,19 @@ namespace MegaPOS.Service
             return customers.ToVm();
         }
 
-        public ProductVm GetProduct (string id)
-            => DatabaseContext.Products.FirstOrDefault(_ => _.Id == id).ToVm();
+        public Product GetProduct (string id)
+            => DatabaseContext.Products
+            .Include(_=>_.Store)
+            .Include(_=>_.Orders)
+            .FirstOrDefault(_ => _.Id == id);
+
+        internal List<Product> GetAllProducts(string storeid)
+            => DatabaseContext.Products
+            .Include(_ => _.Store)
+            .Include(_ => _.Orders)
+            .Where(_ => _.StoreId == storeid)
+            .ToList();
+
 
         internal StoreSetupVm GetStoreSetup(string storeId)
         {

@@ -43,7 +43,7 @@ namespace MegaPOS.Pages
 
         protected override async Task OnInitializedAsync()
         {
-            ExekuteSync(_ => _.Init(Id));
+            ExecuteSync(_ => _.Init(Id));
             HubConnection = MessageHub.SetupMessageHub(NavigationManager);
             SetupMessageHub();
             await HubConnection.StartAsync();
@@ -54,7 +54,7 @@ namespace MegaPOS.Pages
         {
             Model = new StoreViewModel
             {
-                Products = ExecuteSync(posState => posState.GetAllProducts(posState.StoreId)),
+                Products = ExecuteSync(posState => posState.GetAllProducts(posState.StoreId).ToVm()),
                 LeaderboardRows = Model.AvalibleProducts.ToLeaderboardModel()
             };
         }
@@ -69,8 +69,8 @@ namespace MegaPOS.Pages
                     Model.Products.FirstOrDefault(_ => _.Id == Event.ProductId).Quantity = Event.NewQuantity;
                     if (Event.NewQuantity <= 0)
                         Model.LeaderboardRows.FirstOrDefault(_ => _.ProductId == Event.ProductId).IsDisabled = true;
-                    ExekuteSync(_ => _.InvokeProductAddedRemoved());
-                    ExekuteSync(_ => _.InvokeProductPriceChanged());
+                    ExecuteSync(_ => _.InvokeProductAddedRemoved());
+                    ExecuteSync(_ => _.InvokeProductPriceChanged());
                 }
             });
 
@@ -105,8 +105,8 @@ namespace MegaPOS.Pages
                     }
                     
                     StateHasChanged();
-                    ExekuteSync(posState => posState.InvokeProductAddedRemoved());
-                    ExekuteSync(posState => posState.InvokeProductPriceChanged());
+                    ExecuteSync(posState => posState.InvokeProductAddedRemoved());
+                    ExecuteSync(posState => posState.InvokeProductPriceChanged());
 
                     foreach (var item in Model.Products)
                     {
@@ -128,7 +128,7 @@ namespace MegaPOS.Pages
                     Model.Products = Model.Products.UpdatePrice(ChangeEventArgs, ChangeEventArgs.NewPrice);
                     Model.LeaderboardRows = Model.LeaderboardRows.UpdatePrice(ChangeEventArgs, ChangeEventArgs.NewPrice);
 
-                    ExekuteSync(posState => posState.InvokeProductPriceChanged());
+                    ExecuteSync(posState => posState.InvokeProductPriceChanged());
                     
                     await ExecuteAsync(posState => posState.PriceChanged(ChangeEventArgs.ProductId, ChangeEventArgs.OldPrice, ChangeEventArgs.NewPrice));
                 }

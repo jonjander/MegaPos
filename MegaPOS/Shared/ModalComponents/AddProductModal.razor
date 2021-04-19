@@ -16,6 +16,7 @@
                 <FieldLabel>Price</FieldLabel>
                 <NumericEdit @bind-Value="@model.Price"
                              Attributes="@(new Dictionary<string, object> { { "inputmode", "decimal" } })"
+                             DecimalsSeparator=","
                              Decimals="2"
                              Min="1"
                              Max="50000"
@@ -32,6 +33,7 @@
                 <FieldLabel>Local profit</FieldLabel>
                 <NumericEdit @bind-Value="@model.LocalProfit"
                              Attributes="@(new Dictionary<string, object> { { "inputmode", "decimal" } })"
+                             DecimalsSeparator=","
                              Decimals="2"
                              Min="0.1f"
                              Max="10"

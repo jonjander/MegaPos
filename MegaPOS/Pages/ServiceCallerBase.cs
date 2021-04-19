@@ -74,7 +74,7 @@ namespace MegaPOS.Pages
             }
         }
 
-        public void ExekuteSync(
+        public void ExecuteSync(
             Action<PosState> serviceMethod
             )
         {

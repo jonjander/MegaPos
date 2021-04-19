@@ -1,4 +1,5 @@
 ﻿using MegaPOS.Extentions;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections;
@@ -27,7 +28,7 @@ namespace MegaPOS.Model
         public List<Order> Orders { get; set; }
         public string Color { get; set; }
 
-        public void UpdateMinPrice(float procentage)
+		public void UpdateMinPrice(float procentage)
 		{
 			MinPriceProcentage = procentage;
 		}

@@ -10,7 +10,7 @@ namespace MegaPOS.Model.Commands
         public string Name { get;set;}
         public int Quantity { get; set; }
         public float Price { get; set; }
-        public float LocalProfit { get; set; } = 1.1f;
+        public float LocalProfit { get; set; } = 1.10f;
         public string StoreId { get; set; }
 
         public NewProductCommand(string StoreId)
@@ -22,7 +22,8 @@ namespace MegaPOS.Model.Commands
         {
             return Price > 0f &&
                 Quantity > 0f &&
-                LocalProfit > 1f &&
+                LocalProfit > 0 &&
+                LocalProfit < 10 &&
                 !string.IsNullOrEmpty(Name);
         }
     }

@@ -31,12 +31,12 @@ namespace MegaPOS.Shared.ModalComponents.StoreSetup
 
         protected void EraseUnusedCustomers()
         {
-            ExekuteSync(_ => _.ClenupCustomers(Model.StoreId));
+            ExecuteSync(_ => _.ClenupCustomers(Model.StoreId));
         }
    
         public void Save()
         {
-            ExekuteSync(_ => _.UpdateStoreInfo(Model));
+            ExecuteSync(_ => _.UpdateStoreInfo(Model));
             modalRef.Hide();
         }
         public void Close()
