@@ -41,7 +41,7 @@ namespace MegaPOS.Service
 
         public async Task SendQuantityChanged(QuantityEvent notForSaleEvent)
         {
-            await Clients.Others.SendAsync(SendMethods.QuantityChanged.ToString(), notForSaleEvent);
+            await Clients.All.SendAsync(SendMethods.QuantityChanged.ToString(), notForSaleEvent);
         }
 
         public async Task SendGlobalProfitChanged(GlobalProfitChangeEvent globalProfitChangeEvent)

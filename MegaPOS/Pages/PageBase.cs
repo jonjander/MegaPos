@@ -62,15 +62,18 @@ namespace MegaPOS.Pages
 
         protected virtual void SetupMessageHub()
         {
-            HubConnection.On<QuantityEvent>(SendMethods.QuantityChanged.ToString(), (Event) =>
+            HubConnection.On<QuantityEvent>(SendMethods.QuantityChanged.ToString(), async (Event) =>
             {
                 if (StoreId == Event.StoreId)
                 {
                     Model.Products.FirstOrDefault(_ => _.Id == Event.ProductId).Quantity = Event.NewQuantity;
                     if (Event.NewQuantity <= 0)
                         Model.LeaderboardRows.FirstOrDefault(_ => _.ProductId == Event.ProductId).IsDisabled = true;
+
                     ExecuteSync(_ => _.InvokeProductAddedRemoved());
                     ExecuteSync(_ => _.InvokeProductPriceChanged());
+
+                    await ExecuteAsync(posState => posState.QuantityChanged(Event.ProductId, Event.NewQuantity));
                 }
             });
 

@@ -10,8 +10,27 @@ namespace MegaPOS.Model.Commands
     {
         public string Name { get; set; }
         public int Quantity { get; set; }
-        public float MinPriceProcentage { get; set; }
-        public float LocalProfit { get; set; }
+        public float _MinPriceProcentage { get; set; }
+        public float MinPriceProcentage  {
+            get{ 
+                return (float)_MinPriceProcentage / 100; 
+            }    
+            set{
+                _MinPriceProcentage = value * 100f;
+            }
+        }
+        public float _LocalProfit { get; set; }
+        public float LocalProfit
+        {
+            get
+            {
+                return (float)_LocalProfit / 100;
+            }
+            set
+            {
+                _LocalProfit = value * 100f;
+            }
+        }
         public string StoreId { get; set; }
         public string Color { get; set; }
         public string Image { get; set;}
@@ -28,7 +47,7 @@ namespace MegaPOS.Model.Commands
             Name = product.Name;
             Quantity = product.Quantity;
             LocalProfit = product.LocalProfit;
-            MinPriceProcentage = product.MinPriceProcentage;
+            MinPriceProcentage = (float)product.MinPriceProcentage;
             Color = product.Color;
         }
 
