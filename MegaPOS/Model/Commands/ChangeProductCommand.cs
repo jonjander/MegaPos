@@ -59,7 +59,8 @@ namespace MegaPOS.Model.Commands
             Name = product.Name;
             Quantity = product.Quantity;
             LocalProfit = product.LocalProfit;
-            MinPriceProcentage = (float)product.MinPriceProcentage;
+            MinPriceProcentage = product.MinPriceProcentage;
+            MaxPriceProcentage = product.MaxPriceProcentage;
             Color = product.Color;
         }
 
@@ -70,6 +71,7 @@ namespace MegaPOS.Model.Commands
                 Quantity >= 0f &&
                 LocalProfit > 0f &&
                 LocalProfit <= 10f &&
+                MinPriceProcentage < MaxPriceProcentage &&
                 !string.IsNullOrEmpty(Name);
         }
     }

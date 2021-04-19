@@ -12,5 +12,6 @@ namespace MegaPOS.Model
         public float OriginalPrice { get; internal set; }
         public float Price { get; internal set; }
         public float Quantity { get; internal set; }
+        public float MaxPriceProcentage { get; internal set; }
     }
 }

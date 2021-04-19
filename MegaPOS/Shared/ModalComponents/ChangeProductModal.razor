@@ -25,7 +25,7 @@
                             @bind-Value="@model._MinPriceProcentage"
                             Min="1f"
                             Max="1000f" />
-                    <p>@(model.MinPriceProcentage * 100f)%</p>
+                    <p>@((model.MinPriceProcentage * 100f).ToString("0.00"))%</p>
                 </Field>
                 <Field>
                     <FieldLabel>Max price percentage</FieldLabel>
@@ -33,7 +33,7 @@
                             @bind-Value="@model._MaxPriceProcentage"
                             Min="1f"
                             Max="1000f" />
-                    <p>@(model.MaxPriceProcentage * 100f)%</p>
+                    <p>@((model.MaxPriceProcentage * 100f).ToString("0.00"))%</p>
                 </Field>
                 <Field>
                     <FieldLabel>Quantity</FieldLabel>

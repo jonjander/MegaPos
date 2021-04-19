@@ -140,6 +140,7 @@ namespace MegaPOS.Extentions
                 {
                     _.Id,
                     _.MinPriceProcentage,
+                    _.MaxPriceProcentage,
                     _.OriginalPrice,
                     _.Quantity,
                     LocalProfit = (_.LocalProfit + globalProfit) / 2f,
@@ -150,6 +151,7 @@ namespace MegaPOS.Extentions
                 {
                     _.Id,
                     _.MinPriceProcentage,
+                    _.MaxPriceProcentage,
                     _.OriginalPrice,
                     _.Quantity,
                     _.LocalProfit,
@@ -160,7 +162,7 @@ namespace MegaPOS.Extentions
                     Popularity = totalProductsInStore == 0f ? 0f : _.NumberSold / (float)totalProductsInStore
                 }).ToList();
 
-            var keys = stage1.OrderBy(_ => _.Id).Select(_ => $"{_.NumberSold}{_.LocalProfit}{_.TotalNumber}");
+            var keys = stage1.OrderBy(_ => _.Id).Select(_ => $"{_.NumberSold}{_.LocalProfit}{_.TotalNumber}{_.MinPriceProcentage}{_.MaxPriceProcentage}");
             var statKey = string.Join("", keys);
             var cahcekey = $"{statKey}{globalProfit}{totalProductsInStore}{numberOfUniqueProducts}";
 
@@ -185,6 +187,7 @@ namespace MegaPOS.Extentions
                 {
                     _.Id,
                     _.MinPriceProcentage,
+                    _.MaxPriceProcentage,
                     _.OriginalPrice,
                     Quantity = (float)_.Quantity,
                     _.LocalProfit,
@@ -197,6 +200,7 @@ namespace MegaPOS.Extentions
                 {
                     _.Id,
                     _.MinPriceProcentage,
+                    _.MaxPriceProcentage,
                     _.OriginalPrice,
                     _.Quantity,
                     _.LocalProfit,
@@ -208,6 +212,7 @@ namespace MegaPOS.Extentions
                 }).Select(_ => new {
                     _.Id,
                     _.MinPriceProcentage,
+                    _.MaxPriceProcentage,
                     _.OriginalPrice,
                     _.Quantity,
                     _.npwh,
@@ -224,6 +229,7 @@ namespace MegaPOS.Extentions
                 {
                     _.Id,
                     _.MinPriceProcentage,
+                    _.MaxPriceProcentage,
                     _.Quantity,
                     _.OriginalPrice,
                     NewPriceNoDiscount = _.LeftPerProduct * _.npwh * _.LocalProfit,
@@ -233,6 +239,7 @@ namespace MegaPOS.Extentions
                     Id = _.Id,
                     Quantity = _.Quantity,
                     MinPriceProcentage = _.MinPriceProcentage,
+                    MaxPriceProcentage = _.MaxPriceProcentage,
                     OriginalPrice = _.OriginalPrice,
                     Price = _.NewPriceNoDiscount - _.Discount
                 }).ToList();
@@ -256,7 +263,10 @@ namespace MegaPOS.Extentions
 
             var calculatedPrice = slectedProduct?.Price * priceFactor ?? 0f;
             var minPrice = slectedProduct.OriginalPrice * slectedProduct.MinPriceProcentage;
-            var maxPrice = slectedProduct.OriginalPrice * 10f;
+            var maxPrice = slectedProduct.OriginalPrice * slectedProduct.MaxPriceProcentage;
+            if (maxPrice < minPrice)
+                maxPrice = minPrice;
+
             if (calculatedPrice < minPrice)
                 calculatedPrice = minPrice;
             if (calculatedPrice > maxPrice)
