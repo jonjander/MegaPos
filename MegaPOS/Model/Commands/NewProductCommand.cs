@@ -10,12 +10,24 @@ namespace MegaPOS.Model.Commands
         public string Name { get;set;}
         public int Quantity { get; set; }
         public float Price { get; set; }
-        public float LocalProfit { get; set; } = 1.10f;
+        public float _LocalProfit { get; set; }
+        public float LocalProfit
+        {
+            get
+            {
+                return (float)_LocalProfit / 100;
+            }
+            set
+            {
+                _LocalProfit = value * 100f;
+            }
+        }
         public string StoreId { get; set; }
 
         public NewProductCommand(string StoreId)
         {
             this.StoreId = StoreId;
+            LocalProfit = 1.1f;
         }
 
         public bool IsValid()

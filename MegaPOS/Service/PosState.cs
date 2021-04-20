@@ -32,6 +32,7 @@ namespace MegaPOS.Service
         internal void ClenupCustomers(string storeId)
         {
             var emptyCustomers = DatabaseContext.Customers
+                .AsSplitQuery()
                 .Include(_ => _.Orders)
                 .Where(_ => _.StoreId == storeId)
                 .Where(_ => !_.Orders.Any())
@@ -58,6 +59,7 @@ namespace MegaPOS.Service
         internal CustomerVm GetNewCustomer()
         {
             var emptyslot = DatabaseContext.Customers
+                .AsSplitQuery()
                 .Include(_ => _.Orders)
                 .FirstOrDefault(_ => _.Orders.Count == 0 && string.IsNullOrEmpty(_.Name) && _.StoreId == StoreId);
             if (emptyslot != null)
@@ -351,6 +353,7 @@ namespace MegaPOS.Service
             if (string.IsNullOrEmpty(name))
                 throw new Exception("name error");
             var existing = DatabaseContext.Stores
+                .AsSplitQuery()
                 .Include(_ => _.Products)
                 .Include(_ => _.Orders)
                 .ThenInclude(_ => _.Product)
@@ -456,6 +459,7 @@ namespace MegaPOS.Service
                 .ToList();
 
             var currentstore = DatabaseContext.Stores
+                .AsSplitQuery()
                 .Include(_=>_.Products)
                 .Include(_=>_.Orders)
                 .FirstOrDefault(_ => _.Id == StoreId);
@@ -564,6 +568,7 @@ namespace MegaPOS.Service
                 return new List<CustomerVm>();
             isLoadingCustomers = true;
             var customers = DatabaseContext.Customers
+                .AsSplitQuery()
                 .Include(_=>_.Orders)
                 .Where(_ => _.Closed != true && _.StoreId == StoreId)
                 .ToList();
@@ -573,12 +578,14 @@ namespace MegaPOS.Service
 
         public Product GetProduct (string id)
             => DatabaseContext.Products
+            .AsSplitQuery()
             .Include(_=>_.Store)
             .Include(_=>_.Orders)
             .FirstOrDefault(_ => _.Id == id);
 
         internal List<Product> GetAllProducts(string storeid)
             => DatabaseContext.Products
+            .AsSplitQuery()
             .Include(_ => _.Store)
             .Include(_ => _.Orders)
             .Where(_ => _.StoreId == storeid)

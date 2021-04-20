@@ -22,7 +22,7 @@
     <Column ColumnSize="ColumnSize.Is4" Style="padding-left: 4px; padding-right: 5px;">
         <Button Clicked="AddProductModal.ShowModal"
                 Color="Color.Primary">
-            + product
+            + Product
         </Button>
     </Column>
     <Column ColumnSize="ColumnSize.Is5" Style="padding-left: 4px; padding-right: 5px;">
@@ -72,30 +72,40 @@
                     }
                 }
             </div>
-            <div class="cart-checkout">
-                <div>Total: @(Customer?.Orders?.Sum(_=>_.Price).ToString("0.00") ?? "0.00")kr</div>
-                <Button Clicked="Checkout"
-                        Disabled="@(!(Customer?.Orders?.Any() ?? false))"
-                        Class="cart-buttons"
-                        Color="Color.Warning">
-                    Checkout
-                </Button>
-                <Button Clicked="ParkCustomer"
-                        Class="cart-buttons"
-                        Color="Color.Warning">
-                    Park
-                </Button>
-            </div>
         </div>
     </Column>
 </Row>
 <Row Class="pos-foot">
-    <Column ColumnSize="ColumnSize.Is11">
+    <Column ColumnSize="ColumnSize.Is1">
+        <Button Color="Color.Dark"
+                Clicked="OpenSetupModal">
+            Setup
+        </Button>
+    </Column>
+    <Column ColumnSize="ColumnSize.Is7">
         <Slider TValue="int" Value="@GlobalProfit" ValueChanged="@ChangeGlobalProfit" Min="50" Max="400" Step="1" />
         <p>@(GlobalProfit) %</p>
     </Column>
-    <Column ColumnSize="ColumnSize.Is1">
-        <Button Color="Color.Dark"
-                Clicked="OpenSetupModal">Setup</Button>
+    <Column ColumnSize="ColumnSize.Is4">
+        <div class="cart-checkout">
+            <div>Total: @(Customer?.Orders?.Sum(_=>_.Price).ToString("0.00") ?? "0.00")kr</div>
+            <Row>
+                <Column>
+                    <Button Clicked="Checkout"
+                            Disabled="@(!(Customer?.Orders?.Any() ?? false))"
+                            Class="cart-buttons"
+                            Color="Color.Warning">
+                        Checkout
+                    </Button>
+                </Column>
+                <Column>
+                    <Button Clicked="ParkCustomer"
+                            Class="cart-buttons"
+                            Color="Color.Warning">
+                        Park
+                    </Button>
+                </Column>
+            </Row>
+        </div>
     </Column>
 </Row>

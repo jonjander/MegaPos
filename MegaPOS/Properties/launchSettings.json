@@ -22,7 +22,7 @@
       "executablePath": "C:\\Program Files\\dotnet\\dotnet.exe",
       "commandLineArgs": "watch run",
       "launchBrowser": true,
-      "launchUrl": "test3",
+      "launchUrl": "testing1",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "VaultUri": "https://megaposvault.vault.azure.net/",
@@ -34,7 +34,7 @@
     "MegaPOSBoard": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "test3/board",
+      "launchUrl": "testing1/board",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "VaultUri": "https://megaposvault.vault.azure.net/",
@@ -46,7 +46,7 @@
     "MegaPOSTerminal": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "test3/terminal/t0",
+      "launchUrl": "testing1/terminal/t0",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "VaultUri": "https://megaposvault.vault.azure.net/",

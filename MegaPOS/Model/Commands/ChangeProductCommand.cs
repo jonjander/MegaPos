@@ -12,7 +12,9 @@ namespace MegaPOS.Model.Commands
         public int Quantity { get; set; }
         public float _MinPriceProcentage { get; set; }
         public float MinPriceProcentage  {
-            get{ 
+            get{
+                if (_LocalProfit < _MinPriceProcentage)
+                    _LocalProfit = _MinPriceProcentage;
                 return (float)_MinPriceProcentage / 100; 
             }    
             set{
@@ -24,6 +26,8 @@ namespace MegaPOS.Model.Commands
         {
             get
             {
+                if (_LocalProfit > _MaxPriceProcentage)
+                    _LocalProfit = _MaxPriceProcentage;
                 return (float)_MaxPriceProcentage / 100;
             }
             set

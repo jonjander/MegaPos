@@ -16,6 +16,7 @@ namespace MegaPOS.Pages.LeaderboardPage
             await base.OnInitializedAsync();
             ExecuteSync(posState => posState.OnProductAddedRemoved += ProductAdded);
             ExecuteSync(posState => posState.OnProductPriceChanged += RefreshPriceState);
+            ReloadBoard();
         }
 
         //protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -31,6 +32,7 @@ namespace MegaPOS.Pages.LeaderboardPage
 
         private void ProductAdded(object sender, EventArgs e)
         {
+            ReloadBoard();
             StateHasChanged();
         }
 

@@ -68,9 +68,13 @@ namespace MegaPOS.Pages
                 {
                     Model.Products.FirstOrDefault(_ => _.Id == Event.ProductId).Quantity = Event.NewQuantity;
                     if (Event.NewQuantity <= 0)
-                        Model.LeaderboardRows.FirstOrDefault(_ => _.ProductId == Event.ProductId).IsDisabled = true;
+                    {
+                        var toBeDisabled = Model.LeaderboardRows.FirstOrDefault(_ => _.ProductId == Event.ProductId);
+                        if (toBeDisabled != null)
+                            toBeDisabled.IsDisabled = true;
+                    }
 
-                    ExecuteSync(_ => _.InvokeProductAddedRemoved());
+                    //ExecuteSync(_ => _.InvokeProductAddedRemoved());
                     ExecuteSync(_ => _.InvokeProductPriceChanged());
 
                     await ExecuteAsync(posState => posState.QuantityChanged(Event.ProductId, Event.NewQuantity));

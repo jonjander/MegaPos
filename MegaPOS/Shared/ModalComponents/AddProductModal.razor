@@ -14,7 +14,8 @@
             </Field>
             <Field>
                 <FieldLabel>Price</FieldLabel>
-                <NumericEdit @bind-Value="@model.Price"
+                <NumericEdit @bind-Value=model.Price
+                             TValue="float"
                              Attributes="@(new Dictionary<string, object> { { "inputmode", "decimal" } })"
                              DecimalsSeparator=","
                              Decimals="2"
@@ -24,20 +25,19 @@
             </Field>
             <Field>
                 <FieldLabel>Quantity</FieldLabel>
-                <NumericEdit @bind-Value="@model.Quantity"
+                <NumericEdit @bind-Value=model.Quantity
+                             TValue="int"
                              Min="1"
                              Max="10000"
                              Placeholder="Quantity" />
             </Field>
             <Field>
                 <FieldLabel>Local profit</FieldLabel>
-                <NumericEdit @bind-Value="@model.LocalProfit"
-                             Attributes="@(new Dictionary<string, object> { { "inputmode", "decimal" } })"
-                             DecimalsSeparator=","
-                             Decimals="2"
-                             Min="0.1f"
-                             Max="10"
-                             Placeholder="Local profit" />
+                <Slider TValue="float"
+                        @bind-Value="@model._LocalProfit"
+                        Min="1f"
+                        Max="1000f" />
+                <p>@(model.LocalProfit * 100f)%</p>
             </Field>
         </ModalBody>
         <ModalFooter>

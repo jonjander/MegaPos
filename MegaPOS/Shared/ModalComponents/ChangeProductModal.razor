@@ -16,6 +16,11 @@
                               @bind-Text="model.Name" />
                 </Field>
                 <Field>
+                    <FieldLabel>Quantity</FieldLabel>
+                    <NumericEdit @bind-Value="@model.Quantity"
+                                 Placeholder="Quantity" />
+                </Field>
+                <Field>
                     <FieldLabel>Color</FieldLabel>
                     <ColorEdit Color="@model.Color" ColorChanged="ChangeColor" />
                 </Field>
@@ -36,22 +41,17 @@
                     <p>@((model.MaxPriceProcentage * 100f).ToString("0.00"))%</p>
                 </Field>
                 <Field>
-                    <FieldLabel>Quantity</FieldLabel>
-                    <NumericEdit @bind-Value="@model.Quantity"
-                                 Placeholder="Quantity" />
-                </Field>
-                <Field>
                     <FieldLabel>Local profit</FieldLabel>
                     <Slider TValue="float"
                             @bind-Value="@model._LocalProfit"
-                            Min="1f"
-                            Max="1000f" />
-                    <p>@(model.LocalProfit * 100f)%</p>
+                            Min="@model._MinPriceProcentage"
+                            Max="@model._MaxPriceProcentage" />
+                    <p>@((model.LocalProfit * 100f).ToString("0.00"))%</p>
                 </Field>
             </ModalBody>
             <ModalFooter>
                 <Button Color="Color.Secondary" Clicked="@Close">Close</Button>
-                <Button Color="Color.Primary" Clicked="@Save">Save</Button>
+                <Button Color="Color.Primary" Clicked="@Save" Disabled="@(!model.IsValid())">Save</Button>
             </ModalFooter>
         </ModalContent>
     </Modal>
