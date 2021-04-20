@@ -21,8 +21,6 @@ using MegaPOS.Model.UpdateRow;
 
 namespace MegaPOS.Service
 {
-
-
     public class PosState
     {
         private readonly IUnitOfWork DatabaseContext;
@@ -120,15 +118,12 @@ namespace MegaPOS.Service
             });
         }
 
-        
-
         internal CustomerVm LoadCustmer(string customerId)
         {
             var customer = DatabaseContext.Customers
                 .FirstOrDefault(_ => _.Id == customerId);
             return customer.ToVm();
         }
-
       
         private async Task<string> SaveName(string id, string value)
         {
@@ -243,8 +238,6 @@ namespace MegaPOS.Service
             }
         }
 
-
-
         internal async Task ChangeProductQuantity(string productId, int diff, HubConnection hubConnection)
         {
             //todo send change event for price and quantity
@@ -322,7 +315,6 @@ namespace MegaPOS.Service
                 item.StoreId = StoreId;
                 await hubConnection.SendAsync(nameof(MessageHub.SendPriceChanged), item);
             }
-
         }
 
         internal void ChangeProductLocalProfit(string productId, float localProfit)
@@ -479,7 +471,6 @@ namespace MegaPOS.Service
             DatabaseContext.Orders.Add(new Order(StoreId, p, OrderType.Expences, p.OriginalPrice, product.Quantity));
             DatabaseContext.SaveChanges();
 
-
             var addedEvent = new ProductAddedEvent(newProduct.Entity.ToVm())
             {
                 StoreId = StoreId
@@ -504,8 +495,6 @@ namespace MegaPOS.Service
                 await hubConnection.SendAsync(nameof(MessageHub.SendPriceChanged), item);
             }
         }
-
-
 
         public event EventHandler OnProductAddedRemoved;
         public void InvokeProductAddedRemoved()
